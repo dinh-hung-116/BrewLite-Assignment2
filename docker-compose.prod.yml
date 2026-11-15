@@ -1,0 +1,54 @@
+# Production trên máy server của nhóm, công khai qua Tailscale Funnel (ADR-006).
+# CD (.github/workflows/cd.yml) chạy file này trên self-hosted runner với IMAGE_TAG = commit SHA.
+# Web và API chỉ mở trên 127.0.0.1; Tailscale Funnel đưa ra Internet bằng HTTPS:
+#   tailscale funnel --bg 3000                 -> https://<máy>.<tailnet>.ts.net
+#   tailscale funnel --bg --https=8443 3001    -> https://<máy>.<tailnet>.ts.net:8443
+# Database không mở cổng ra ngoài.
+
+name: brewlite-prod
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: brewlite
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?thiếu POSTGRES_PASSWORD}
+      POSTGRES_DB: brewlite_db
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U brewlite -d brewlite_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    image: ${API_IMAGE:?thiếu API_IMAGE}:${IMAGE_TAG:?thiếu IMAGE_TAG}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://brewlite:${POSTGRES_PASSWORD}@db:5432/brewlite_db
+      PORT: 3001
+      JWT_SECRET: ${JWT_SECRET:?thiếu JWT_SECRET}
+      CORS_ORIGIN: ${WEB_URL:?thiếu WEB_URL}
+      FRONTEND_URL: ${WEB_URL}
+      PAYMENT_PROVIDER: mock
+      SEED_ON_START: "true"
+    ports:
+      - "127.0.0.1:3001:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    image: ${WEB_IMAGE:?thiếu WEB_IMAGE}:${IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  db_data:

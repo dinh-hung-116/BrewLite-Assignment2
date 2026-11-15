@@ -1,5 +1,5 @@
 @startuml deployment
-' UML Deployment diagram – production (Task 3.2)
+' UML Deployment diagram – production (Task 3.2), theo ADR-006
 skinparam shadowing false
 left to right direction
 
@@ -7,41 +7,50 @@ node "Thiết bị người dùng" as Dev {
   node "Trình duyệt di động / PWA" as Browser
 }
 
+node "Tailscale" as TS {
+  node "Funnel relay\nHTTPS, chứng chỉ *.ts.net" as Funnel
+}
+
 node "GitHub" as GH {
-  node "GitHub Actions runner\n<<CI/CD>>" as Runner {
+  node "GitHub-hosted runner\n<<CI/CD>>" as Runner {
     artifact "ci.yml / cd.yml" as WF
   }
   node "GitHub Container Registry\nghcr.io" as GHCR {
-    artifact "brewlite-api:<commit-sha>" as Img
+    artifact "brewlite-api:<commit-sha>" as ImgApi
+    artifact "brewlite-web:<commit-sha>" as ImgWeb
   }
   node "GitHub Secrets" as Sec
 }
 
-node "Vercel (Edge Network / CDN)" as Vercel {
-  artifact "apps/web\nNext.js build (SSR + static)" as WebArt
-}
-
-node "Render – region Singapore" as Render {
-  node "Web Service (Docker container)\nport 3001 nội bộ" as ApiNode {
-    artifact "brewlite-api:<commit-sha>\nNestJS + Prisma" as ApiArt
-    component "GET /health" as Health
-    component "stdout log (JSON)" as Log
+node "Máy server của nhóm\n<<device>> Docker Engine" as Server {
+  node "tailscaled\n(funnel 443 → :3000, 8443 → :3001)" as TSD
+  node "Self-hosted runner\nnhãn brewlite-prod" as SHR
+  node "docker compose\n(docker-compose.prod.yml)" as Compose {
+    node "web container\n127.0.0.1:3000" as WebNode {
+      artifact "brewlite-web:<commit-sha>\nNext.js" as WebArt
+    }
+    node "api container\n127.0.0.1:3001" as ApiNode {
+      artifact "brewlite-api:<commit-sha>\nNestJS + Prisma" as ApiArt
+      component "GET /health" as Health
+    }
+    database "PostgreSQL 16\nvolume db_data\n(không mở cổng)" as PG
   }
-  database "Render PostgreSQL 16\npersistent disk\n(không public)" as PG
 }
 
-Browser --> WebArt : HTTPS 443
-Browser --> ApiArt : HTTPS 443 (REST, CORS)
-ApiArt --> PG : TCP 5432 internal URL\nDATABASE_URL (secret)
+Browser --> Funnel : HTTPS 443 (web)\nHTTPS 8443 (API, CORS)
+Funnel --> TSD : đường hầm WireGuard
+TSD --> WebArt : HTTP 127.0.0.1:3000
+TSD --> ApiArt : HTTP 127.0.0.1:3001
+ApiArt --> PG : TCP 5432 trong mạng Docker\nDATABASE_URL
 Runner --> GHCR : docker push (tag = SHA)
-Runner --> ApiNode : Deploy Hook (secret)\nprisma migrate deploy
-Runner --> Vercel : vercel deploy --prod\n(VERCEL_TOKEN)
-Runner --> Health : smoke test sau deploy
-GHCR --> ApiNode : pull image
-Sec ..> Runner : RENDER_DEPLOY_HOOK_URL,\nVERCEL_TOKEN, GHCR token
+Runner --> SHR : job deploy / rollback
+SHR --> Compose : docker compose pull + up\nprisma migrate deploy
+GHCR --> Compose : pull image
+Runner --> Funnel : smoke test /health, /products, /
+Sec ..> SHR : JWT_SECRET, POSTGRES_PASSWORD
 
-note bottom of ApiNode
-  Env: DATABASE_URL, JWT_SECRET, CORS_ORIGIN,
-  NODE_ENV=production (khai báo trên Render, không nằm trong repo)
+note bottom of Compose
+  Secret truyền qua biến môi trường của job,
+  không nằm trong repository.
 end note
 @enduml

@@ -1,6 +1,7 @@
-# CD: merge vào main (hoặc tag v*) -> build image API gắn tag commit SHA -> đẩy lên GHCR
-# -> deploy API lên Render, web lên Vercel -> smoke test production -> lỗi thì rollback.
-# Bật deploy bằng repository variable DEPLOY_ENABLED=true sau khi đã khai báo secret (docs/deployment.md).
+# CD: merge vào main (hoặc tag v*) -> build image API + web gắn tag commit SHA -> đẩy lên GHCR
+# -> deploy trên máy server của nhóm (self-hosted runner, docker compose) -> smoke test qua URL
+#    Tailscale Funnel công khai -> lỗi thì rollback về tag stable.
+# Bật deploy bằng repository variable DEPLOY_ENABLED=true sau khi đã cài runner và khai báo secret (docs/deployment.md).
 name: CD
 
 on:
@@ -18,70 +19,72 @@ permissions:
   packages: write
 
 env:
+  # Tên owner phải viết thường (GHCR); job trên runner dùng thẳng giá trị này nên chạy được cả trên Windows.
   API_IMAGE: ghcr.io/${{ github.repository_owner }}/brewlite-api
+  WEB_IMAGE: ghcr.io/${{ github.repository_owner }}/brewlite-web
 
 jobs:
   build-push:
-    name: Build + push image API (tag SHA)
+    name: Build + push image API và web (tag SHA)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Image name lowercase
-        run: echo "API_IMAGE=${API_IMAGE,,}" >> "$GITHUB_ENV"
+        run: |
+          echo "API_IMAGE=${API_IMAGE,,}" >> "$GITHUB_ENV"
+          echo "WEB_IMAGE=${WEB_IMAGE,,}" >> "$GITHUB_ENV"
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build + push
+      - name: Build + push API
         run: |
           docker build --build-arg GIT_SHA=${{ github.sha }} -t "$API_IMAGE:${{ github.sha }}" apps/api
           docker push "$API_IMAGE:${{ github.sha }}"
+      - name: Build + push web (nhúng URL API production)
+        run: |
+          docker build --build-arg NEXT_PUBLIC_API_URL="${{ vars.API_URL || 'http://localhost:3001' }}" -t "$WEB_IMAGE:${{ github.sha }}" apps/web
+          docker push "$WEB_IMAGE:${{ github.sha }}"
 
   deploy:
-    name: Deploy production
+    name: Deploy production (máy server qua Tailscale Funnel)
     needs: build-push
     if: vars.DEPLOY_ENABLED == 'true'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, brewlite-prod]
     environment:
       name: production
       url: ${{ vars.WEB_URL }}
+    env:
+      IMAGE_TAG: ${{ github.sha }}
+      WEB_URL: ${{ vars.WEB_URL }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
-      - name: Image name lowercase
-        run: echo "API_IMAGE=${API_IMAGE,,}" >> "$GITHUB_ENV"
-      - name: Deploy API lên Render (image theo SHA)
-        run: |
-          curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}&imgURL=$(printf %s "$API_IMAGE:${{ github.sha }}" | jq -sRr @uri)"
-      - name: Đợi API trả đúng phiên bản
-        run: |
-          for i in $(seq 1 60); do
-            v=$(curl -fsS "${{ vars.API_URL }}/health" | jq -r .version || true)
-            [ "$v" = "${{ github.sha }}" ] && echo "API $v" && exit 0
-            sleep 10
-          done
-          echo "API chưa lên phiên bản ${{ github.sha }}"; exit 1
-      - name: Deploy web lên Vercel
-        working-directory: apps/web
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          npx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
-          npx vercel@latest build --prod --token="$VERCEL_TOKEN"
-          npx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Kéo image theo SHA
+        run: docker compose -f docker-compose.prod.yml pull api web
+      - name: Chạy bản mới (API tự chạy prisma migrate deploy khi khởi động)
+        run: docker compose -f docker-compose.prod.yml up -d --wait
 
   smoke-test:
     name: Smoke test production
     needs: deploy
     runs-on: ubuntu-latest
     steps:
-      - name: /health đúng SHA, DB up
+      - name: Đợi /health trả đúng SHA, DB up
         run: |
-          body=$(curl -fsS "${{ vars.API_URL }}/health")
-          echo "$body"
-          echo "$body" | jq -e --arg sha "${{ github.sha }}" '.status=="ok" and .db=="up" and .version==$sha'
+          for i in $(seq 1 30); do
+            body=$(curl -fsS "${{ vars.API_URL }}/health" || true)
+            echo "$body" | jq -e --arg sha "${{ github.sha }}" '.status=="ok" and .db=="up" and .version==$sha' && exit 0
+            sleep 10
+          done
+          echo "API chưa lên phiên bản ${{ github.sha }}: $body"; exit 1
       - name: /products có dữ liệu
         run: curl -fsS "${{ vars.API_URL }}/products" | jq -e 'length > 0'
       - name: Trang web mở được qua HTTPS
@@ -93,28 +96,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Image name lowercase
-        run: echo "API_IMAGE=${API_IMAGE,,}" >> "$GITHUB_ENV"
+        run: |
+          echo "API_IMAGE=${API_IMAGE,,}" >> "$GITHUB_ENV"
+          echo "WEB_IMAGE=${WEB_IMAGE,,}" >> "$GITHUB_ENV"
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - run: docker buildx imagetools create -t "$API_IMAGE:stable" "$API_IMAGE:${{ github.sha }}"
+      - run: |
+          docker buildx imagetools create -t "$API_IMAGE:stable" "$API_IMAGE:${{ github.sha }}"
+          docker buildx imagetools create -t "$WEB_IMAGE:stable" "$WEB_IMAGE:${{ github.sha }}"
 
   rollback:
     name: Rollback về bản stable
     needs: [deploy, smoke-test]
     if: failure() && vars.DEPLOY_ENABLED == 'true'
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, brewlite-prod]
+    env:
+      IMAGE_TAG: stable
+      WEB_URL: ${{ vars.WEB_URL }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
     steps:
-      - name: Image name lowercase
-        run: echo "API_IMAGE=${API_IMAGE,,}" >> "$GITHUB_ENV"
-      - name: API về image stable
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Chạy lại image stable
         run: |
-          curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}&imgURL=$(printf %s "$API_IMAGE:stable" | jq -sRr @uri)"
-      - name: Web về bản production trước
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: npx vercel@latest rollback --yes --token="$VERCEL_TOKEN"
+          docker compose -f docker-compose.prod.yml pull api web
+          docker compose -f docker-compose.prod.yml up -d --wait

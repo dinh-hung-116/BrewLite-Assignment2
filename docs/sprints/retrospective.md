@@ -12,7 +12,7 @@ Nhóm 14 · Scrum Master: Nhữ Đình Hùng · Product Owner: Trương Thanh T�
 
 - Đường dẫn API thanh toán và khuyến mãi khi hiện thực khác thiết kế Task 3; phải quay lại sửa Sequence-01 và architecture-overview.
 - Test e2e của A1 dùng email cố định nên không chạy lặp lại được trên cùng DB.
-- Quyền GitHub và tài khoản Render/Vercel được chuẩn bị muộn, làm chậm phần deploy.
+- Quyền GitHub và nền tảng deploy chốt muộn (đổi từ Render/Vercel sang máy nhóm + Tailscale Funnel), phải sửa lại ADR-006, deployment diagram và CD.
 
 ## Hành động cho lần sau
 
