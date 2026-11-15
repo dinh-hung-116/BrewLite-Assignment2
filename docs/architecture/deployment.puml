@@ -8,7 +8,7 @@ node "Thiết bị người dùng" as Dev {
 }
 
 node "Tailscale" as TS {
-  node "Funnel relay\nHTTPS, chứng chỉ *.ts.net" as Funnel
+  node "Funnel relay\nHTTPS, datacenter.tailbd1760.ts.net" as Funnel
 }
 
 node "GitHub" as GH {
@@ -23,7 +23,7 @@ node "GitHub" as GH {
 }
 
 node "Máy server của nhóm\n<<device>> Docker Engine" as Server {
-  node "tailscaled\n(funnel 443 → :3000, 8443 → :3001)" as TSD
+  node "tailscaled\n(funnel 8443 → :3000, 10000 → :3001)" as TSD
   node "Self-hosted runner\nnhãn brewlite-prod" as SHR
   node "docker compose\n(docker-compose.prod.yml)" as Compose {
     node "web container\n127.0.0.1:3000" as WebNode {
@@ -37,7 +37,7 @@ node "Máy server của nhóm\n<<device>> Docker Engine" as Server {
   }
 }
 
-Browser --> Funnel : HTTPS 443 (web)\nHTTPS 8443 (API, CORS)
+Browser --> Funnel : HTTPS 8443 (web)\nHTTPS 10000 (API, CORS)
 Funnel --> TSD : đường hầm WireGuard
 TSD --> WebArt : HTTP 127.0.0.1:3000
 TSD --> ApiArt : HTTP 127.0.0.1:3001

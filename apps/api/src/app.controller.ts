@@ -14,7 +14,7 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  /** NFR-04: dùng cho Docker HEALTHCHECK, Render health check và smoke test sau deploy. */
+  /** NFR-04: dùng cho Docker HEALTHCHECK và smoke test sau deploy (qua Tailscale Funnel). */
   @Get('health')
   async healthCheck() {
     const version = process.env.GIT_SHA ?? 'dev';

@@ -38,9 +38,9 @@ Lifeline: Customer → Next.js UI → NestJS API → Database → Payment Servic
 |---|---|---|
 | 7 trạng thái đơn và các mũi tên chuyển | SRS BR-06, Class-01 `OrderStatus`, Activity-01, Sequence-01 | Khớp: Sequence chỉ dùng PENDING → PAID/PAYMENT_FAILED; Activity thêm PREPARING → READY → COMPLETED và CANCELLED khi hết hạn |
 | Giới hạn số lượng 1–20 | SRS FR-02, BR-02; Class-01 `OrderItem.quantity [1..20]`; Sequence bước 6 | Khớp |
-| Idempotency | SRS FR-07; UC E4; Sequence bước 18–22; Class-01 `Payment.idempotencyKey {unique}` | Khớp |
-| Giữ nguyên liệu, chống bán quá kho | SRS FR-13, BR-04; UC E3; Activity "Đủ nguyên liệu?"; Sequence transaction; Class-01 `Ingredient.version` | Khớp |
-| Khuyến mãi, điểm thưởng | SRS FR-11, FR-12, BR-03; UC-07 «extend»; Sequence bước 16, 27; Class-01 Promotion, LoyaltyTransaction | Khớp |
+| Idempotency | SRS FR-07; UC E4; Sequence bước 20–32; Class-01 `Payment.idempotencyKey {unique}` | Khớp |
+| Giữ nguyên liệu, chống bán quá kho | SRS FR-13, BR-04; UC E3; Activity "Đủ nguyên liệu?"; Sequence transaction; Class-01 `Ingredient.version`, `OrderIngredientReservation` | Khớp |
+| Khuyến mãi, điểm thưởng | SRS FR-11, FR-12, BR-03; UC-07 «extend»; Sequence bước 37–41; Class-01 Promotion, LoyaltyTransaction | Khớp |
 | Actor của use case ↔ lifeline/swimlane | Use case (Khách hàng, Cổng thanh toán, Nhân viên quầy) ↔ Activity swimlane ↔ Sequence lifeline | Khớp; Nhân viên quầy không có trong Sequence vì nằm ngoài UC-06 + UC-08 |
-| Phương thức thanh toán Ví/Thẻ mô phỏng | SRS FR-06; UC-08; Class-01 `PaymentMethod` | Khớp |
-| Mô hình dữ liệu | Class-01 ↔ `apps/api/prisma/schema.prisma` (Task 4–5) | Kiểm lại khi hiện thực; mọi thay đổi phải cập nhật Class-01 qua PR |
+| Phương thức thanh toán Ví/Thẻ mô phỏng | SRS FR-06; UC-08; Class-01 `Payment.paymentMethod` (WALLET/CARD/VNPAY) | Khớp |
+| Mô hình dữ liệu | Class-01 ↔ `apps/api/prisma/schema.prisma` | Khớp: 14 class ứng với 14 bảng, tên enum và trạng thái (SUCCESS, FIXED_AMOUNT) lấy đúng từ schema; mọi thay đổi schema phải cập nhật Class-01 qua PR |

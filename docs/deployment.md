@@ -4,9 +4,11 @@ Nền tảng theo [ADR-006](architecture/adr/006-deploy-tailscale-funnel-ghcr.md
 
 | Thành phần | URL production |
 | --- | --- |
-| Web | `https://<máy>.<tailnet>.ts.net` |
-| API | `https://<máy>.<tailnet>.ts.net:8443` |
-| Health check | `https://<máy>.<tailnet>.ts.net:8443/health` |
+| Web | https://datacenter.tailbd1760.ts.net:8443 |
+| API | https://datacenter.tailbd1760.ts.net:10000 |
+| Health check | https://datacenter.tailbd1760.ts.net:10000/health |
+
+Funnel chỉ cho cổng 443, 8443, 10000; cổng 443 của máy server đã dùng cho dịch vụ khác nên web dùng 8443, API dùng 10000.
 
 ## 1. Thiết lập một lần trên máy server
 
@@ -15,15 +17,15 @@ Máy server cần Docker (Docker Desktop trên Windows/macOS hoặc Docker Engin
 1. **Tailscale:** cài Tailscale, đăng nhập tailnet của nhóm. Trong trang quản trị Tailscale bật *HTTPS Certificates* (DNS) và cho phép Funnel cho máy này (Access controls → `nodeAttrs` có `"attr": ["funnel"]`).
 2. **Bật Funnel** (chạy một lần, tự giữ sau khi khởi động lại):
    ```bash
-   tailscale funnel --bg 3000                # web  -> https://<máy>.<tailnet>.ts.net
-   tailscale funnel --bg --https=8443 3001   # API  -> https://<máy>.<tailnet>.ts.net:8443
+   tailscale funnel --bg --https=8443 3000    # web  -> https://datacenter.tailbd1760.ts.net:8443
+   tailscale funnel --bg --https=10000 3001   # API  -> https://datacenter.tailbd1760.ts.net:10000
    tailscale funnel status                   # xem URL
    ```
 3. **Self-hosted runner:** GitHub → repo → Settings → Actions → Runners → *New self-hosted runner*, làm theo lệnh GitHub hiển thị cho đúng hệ điều hành; khi `config` thêm nhãn `brewlite-prod`, rồi cài chạy như service (`svc install` trên Linux/macOS, chọn "run as service" trên Windows).
 4. **An toàn cho repo public:** Settings → Actions → General → *Fork pull request workflows from outside collaborators* = **Require approval for all outside collaborators**. Runner chỉ được dùng trong `cd.yml` (chạy khi push `main`/tag), CI của pull request vẫn chạy trên runner của GitHub.
 5. **GitHub → Settings → Secrets and variables → Actions:**
    - Secrets: `JWT_SECRET` (chuỗi ngẫu nhiên dài), `POSTGRES_PASSWORD`
-   - Variables: `WEB_URL=https://<máy>.<tailnet>.ts.net`, `API_URL=https://<máy>.<tailnet>.ts.net:8443`, `DEPLOY_ENABLED=true`
+   - Variables: `WEB_URL=https://datacenter.tailbd1760.ts.net:8443`, `API_URL=https://datacenter.tailbd1760.ts.net:10000`, `DEPLOY_ENABLED=true`
 6. **Chặn merge khi CI lỗi:** Settings → Rules → Rulesets → nhánh `main`: Require a pull request, Require status checks (`api - install, lint, test, build`, `web - install, lint, test, build`, `api - integration test (PostgreSQL)`, `web - E2E Playwright (Pixel 7)`).
 7. Chạy lại workflow **CD** (Actions → CD → *Run workflow*) hoặc merge một PR vào `main` để deploy lần đầu. Seed menu mẫu chạy tự động (`SEED_ON_START=true`, chạy lặp lại an toàn).
 
@@ -46,7 +48,7 @@ Dùng khi cần quay lại bản trước mà không chờ pipeline. Trên máy 
 1. **Về bản stable** (bản cuối đã qua smoke test), PowerShell:
    ```powershell
    $env:API_IMAGE="ghcr.io/dinh-hung-116/brewlite-api"; $env:WEB_IMAGE="ghcr.io/dinh-hung-116/brewlite-web"
-   $env:IMAGE_TAG="stable"; $env:WEB_URL="https://<máy>.<tailnet>.ts.net"
+   $env:IMAGE_TAG="stable"; $env:WEB_URL="https://datacenter.tailbd1760.ts.net:8443"
    $env:JWT_SECRET="<secret>"; $env:POSTGRES_PASSWORD="<mật khẩu>"
    docker compose -f docker-compose.prod.yml pull api web
    docker compose -f docker-compose.prod.yml up -d --wait

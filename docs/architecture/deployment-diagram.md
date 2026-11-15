@@ -8,7 +8,7 @@ Nền tảng theo [ADR-006](adr/006-deploy-tailscale-funnel-ghcr.md): máy serve
 
 | Node | Nền tảng | Cổng / giao thức | Artifact |
 |---|---|---|---|
-| Thiết bị người dùng | Trình duyệt di động / PWA | HTTPS 443 (web), 8443 (API) tới `<máy>.<tailnet>.ts.net` | – |
+| Thiết bị người dùng | Trình duyệt di động / PWA | HTTPS 8443 (web), 10000 (API) tới `datacenter.tailbd1760.ts.net` | – |
 | Tailscale Funnel | Relay của Tailscale, chứng chỉ `*.ts.net` | HTTPS công khai → đường hầm WireGuard tới `tailscaled` | – |
 | Web | Container trên máy server | `127.0.0.1:3000`, chỉ Funnel truy cập | Image `ghcr.io/dinh-hung-116/brewlite-web:<commit-sha>` từ `apps/web/Dockerfile` |
 | API | Container trên máy server | `127.0.0.1:3001`, chỉ Funnel truy cập | Image `ghcr.io/dinh-hung-116/brewlite-api:<commit-sha>` từ `apps/api/Dockerfile` |
@@ -32,13 +32,13 @@ Repository chỉ có `.env.example`; secret không in ra log (GitHub tự che gi
 
 ## 3. Health check và log
 
-- Docker `HEALTHCHECK` gọi `GET /health` (trả commit SHA và trạng thái DB); `docker compose up --wait` chỉ xong khi API healthy.
+- Docker `HEALTHCHECK` gọi `GET /health`; API trả `{status, db, version}` (HTTP 200 khi DB up, 503 khi DB lỗi), `version` là commit SHA. `docker compose up --wait` chỉ xong khi API healthy.
 - Sau deploy, job `smoke-test` chạy trên runner của GitHub, gọi `/health` (đúng SHA vừa deploy), `/products` và trang `/` qua URL Funnel công khai; lỗi thì job `rollback` chạy lại image `stable`.
 - Log: `docker compose -f docker-compose.prod.yml logs api web` trên máy server; log pipeline trên GitHub Actions.
 
 ## 4. Ranh giới Local, CI và Production
 
-![Local và CI](deployment-local.svg) – nguồn [deployment-local.puml](deployment-local.puml)
+![Ranh giới Local, CI và Production](deployment-local.svg) – nguồn [deployment-local.puml](deployment-local.puml)
 
 | Môi trường | Chạy ở đâu | DB | Secret |
 |---|---|---|---|

@@ -1,15 +1,39 @@
 @startuml deployment-local
-' Môi trường local (docker compose) và ranh giới với CI
+' Ranh giới 3 môi trường: Local (docker compose), CI (GitHub Actions + GHCR) và Production (máy server + Tailscale Funnel)
 skinparam shadowing false
-node "Máy lập trình viên – docker compose" as L {
+skinparam rectangle {
+  BorderStyle dashed
+}
+rectangle "LOCAL – máy lập trình viên (docker compose)" as LOCAL {
   node "web (Next.js) :3000" as W
-  node "api (NestJS) :3001" as A
-  database "db (PostgreSQL) :5432\nvolume brewlite-data" as D
+  node "api (NestJS) :3001\nGET /health" as A
+  database "db (PostgreSQL)\nvolume db_data" as D
 }
-node "GitHub Actions (CI)" as CI {
-  artifact "Install → Lint → Unit Test → Build\n+ Integration (service postgres)\n+ E2E (docker compose)" as Q
+rectangle "CI – GitHub (cloud)" as CIB {
+  node "GitHub Actions\nci.yml: Install → Lint → Test → Build\n+ Integration + E2E" as CI
+  node "cd.yml: build image\ntag = commit SHA" as CD
+  artifact "GHCR\nbrewlite-api / brewlite-web:<sha>" as REG
 }
+rectangle "PRODUCTION – máy server nhóm (Windows + Docker)" as PROD {
+  node "Tailscale Funnel (HTTPS)\n:8443 → web, :10000 → api" as F
+  node "self-hosted runner\nnhãn brewlite-prod" as R
+  node "web :3000\n(chỉ 127.0.0.1)" as PW
+  node "api :3001\n(chỉ 127.0.0.1)\nHEALTHCHECK /health" as PA
+  database "db PostgreSQL\n(không mở cổng)" as PD
+}
+actor "Người dùng\n(Internet)" as U
+
 W --> A : http://localhost:3001
 A --> D : postgresql://db:5432
-L ..> CI : git push / pull request
+LOCAL ..> CI : git push / pull request
+CI --> CD : merge vào main
+CD --> REG : docker push
+REG ..> R : docker compose pull
+R --> PA : up -d --wait
+U --> F : https://datacenter...ts.net
+F --> PW
+F --> PA
+PW --> PA
+PA --> PD
+CD ..> F : smoke test /health, /products, /\nlỗi → rollback IMAGE_TAG=stable
 @enduml

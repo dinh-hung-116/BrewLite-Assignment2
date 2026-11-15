@@ -9,15 +9,15 @@ Yêu cầu (SRS) → Use case → Thiết kế → Mã nguồn → Kiểm thử.
 | FR-03 Giỏ hàng | UC-03 | Activity-01 | `web/context/CartContext.tsx`, `web/lib/cart.ts` | `web/lib/cart.test.ts`, E2E `checkout.spec.ts` |
 | FR-04 Xác thực JWT | UC-04, UC-05 | ADR-002, Sequence-01 bước 3 | `api/src/auth/*` | `auth.service.spec.ts`, `auth.controller.spec.ts`, `app.e2e-spec.ts` (AC-06), E2E AC-06 |
 | FR-05 Đặt đơn, tính lại giá | UC-06 | Sequence-01, BR-01 | `api/src/orders/orders.service.ts` (`priceFromCatalog`) | `orders.service.spec.ts`, `app.e2e-spec.ts` (AC-04, 400) |
-| FR-06 Thanh toán Ví/Thẻ mô phỏng | UC-08 | ADR-008, Sequence-01 | `api/src/payments/*`, `web/app/mock-pay/page.tsx` | `mock-gateway.spec.ts`, `app.e2e-spec.ts` (AC-01, AC-02), E2E AC-01, AC-02 |
+| FR-06 Thanh toán (VNPay sandbox / Ví-Thẻ mô phỏng) | UC-08, UC-13 | ADR-008, Sequence-01 | `api/src/payments/*`, `web/app/mock-pay/page.tsx` | `mock-gateway.spec.ts`, `app.e2e-spec.ts` (AC-01, AC-02), E2E AC-01, AC-02 |
 | FR-07 Idempotency | UC-08 E4 | ADR-004 | `payments.service.ts` (`createPayment`, `confirmMockPayment`), `payments.idempotencyKey @unique` | `payments.service.spec.ts` (4 case), `mock-gateway.spec.ts`, `app.e2e-spec.ts` (AC-03) |
-| FR-08 Xác nhận, theo dõi | UC-09 | Activity-01 | `web/app/order-confirmation`, `web/app/orders/[id]` | E2E AC-01, AC-02 |
+| FR-08 Xác nhận, theo dõi | UC-09, UC-10 | Activity-01 | `web/app/order-confirmation`, `web/app/orders/[id]` | E2E AC-01, AC-02 |
 | FR-09 Lịch sử đơn | UC-10 | Class-01 | `orders.controller.ts` (`GET /orders/me`) | `orders.controller.spec.ts` |
-| FR-10 Trạng thái đơn (quầy) | UC-12 | ADR-003, BR-06 | `orders/order-state.ts`, `staff-orders.controller.ts`, `web/app/staff` | `order-state.spec.ts`, `staff-orders.spec.ts` |
+| FR-10 Trạng thái đơn (quầy) | UC-12, UC-14, UC-15 | ADR-003, BR-06 | `orders/order-state.ts`, `staff-orders.controller.ts`, `web/app/staff` | `order-state.spec.ts`, `staff-orders.spec.ts` |
 | FR-11 Khuyến mãi | UC-07 | Class-01 Promotion | `orders.service.ts` (`validatePromotion`) | `promotion.spec.ts` (AC-07), `payments.service.spec.ts` (usage_count khi thanh toán) |
-| FR-12 Điểm thưởng | UC-08 | BR-03, Class-01 LoyaltyTransaction | `payments.service.ts` (`awardLoyaltyPoints`) | `payments.service.spec.ts` |
-| FR-13 Tồn kho | UC-06 E3 | ADR-005, BR-04 | `api/src/inventory/*` | `inventory.calculator.spec.ts`, `inventory.service.spec.ts` |
-| FR-14 Hủy đơn, hết hạn 15 phút | UC-11 | BR-05 | `orders.service.ts` (`cancelOrder`), `order-expiry.service.ts`, `payments-scheduler.service.ts` | `orders.cancel.spec.ts`, `payments-scheduler.service.spec.ts` |
+| FR-12 Điểm thưởng | UC-17 | BR-03, Class-01 LoyaltyTransaction | `payments.service.ts` (`awardLoyaltyPoints`) | `payments.service.spec.ts` |
+| FR-13 Tồn kho | UC-18, UC-19 | ADR-005, BR-04 | `api/src/inventory/*` | `inventory.calculator.spec.ts`, `inventory.service.spec.ts` |
+| FR-14 Hủy đơn, hết hạn 15 phút | UC-11, UC-15, UC-16 | BR-05 | `orders.service.ts` (`cancelOrder`), `order-expiry.service.ts`, `payments-scheduler.service.ts` | `orders.cancel.spec.ts`, `payments-scheduler.service.spec.ts` |
 | FR-15 PWA | – | – | chưa làm (Could) | – |
 | NFR-01 Hiệu năng | – | – | – | `products.e2e-spec.ts` (< 500 ms) |
 | NFR-02 Bảo mật | – | ADR-002 | `main.ts` (ValidationPipe, kiểm env), bcrypt, `staff.guard.ts` | `auth.*.spec.ts`, `staff-orders.spec.ts` |
