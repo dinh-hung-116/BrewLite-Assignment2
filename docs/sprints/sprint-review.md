@@ -41,5 +41,5 @@ Kết quả kiểm thử: 133 unit test API, 21 unit test web, 12 integration te
 | AC-07 | WELCOME10 trên đơn 40.000đ → 400 | Unit (`promotion.spec.ts`) | Đạt |
 
 Chưa hoàn thành và chuyển tiếp:
-- Bật deploy production (Render + Vercel), lấy URL HTTPS, gắn tag `v1.0.0` và quay video demo.
+- Bật deploy production trên máy server qua Tailscale Funnel, lấy URL HTTPS, gắn tag `v1.0.0` và quay video demo.
 - FR-15 PWA để lại cho sau.

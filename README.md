@@ -66,7 +66,7 @@ cd apps/web && npm ci --legacy-peer-deps && npm run build   # build web
 docker build -t brewlite-api apps/api                       # image API
 ```
 
-Deploy tự động bằng `.github/workflows/cd.yml` khi merge vào `main`: build image tag theo commit SHA → push GHCR → deploy Render (API, chạy `prisma migrate deploy`) và Vercel (web) → smoke test `/health`, `/products`, trang web → gắn tag `stable`. Smoke test lỗi thì job rollback đưa Render về image `:stable` và chạy `vercel rollback`. Rollback thủ công và cách cấu hình secret: [docs/deployment.md](docs/deployment.md).
+Production chạy trên máy server của nhóm, công khai qua Tailscale Funnel (ADR-006). Deploy tự động bằng `.github/workflows/cd.yml` khi merge vào `main`: build image API và web tag theo commit SHA → push GHCR → self-hosted runner trên máy server chạy `docker compose -f docker-compose.prod.yml up` (API tự chạy `prisma migrate deploy`) → smoke test `/health`, `/products`, trang web qua URL Funnel → gắn tag `stable`. Smoke test lỗi thì job rollback chạy lại image `stable`. Rollback thủ công và cách cấu hình secret: [docs/deployment.md](docs/deployment.md).
 
 ## Tài liệu khác
 

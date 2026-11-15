@@ -46,8 +46,8 @@ Frontend cũng chia lớp: `app/` (route, trang) → `components/` (UI) → `lib
 
 ## 4. Logging, health check và quản lý cấu hình
 
-- **Logging:** NestJS `Logger` ghi ra stdout dạng một dòng/request (method, path, status, thời gian, requestId); không ghi mật khẩu, token. Render/Vercel thu stdout làm log.
-- **Health check:** `GET /health` trả `{ status: "ok", db: "up", version: <GIT_SHA> }`, chạy `SELECT 1` tới DB; trả 503 nếu DB lỗi. Dùng cho Docker `HEALTHCHECK`, Render health check và smoke test sau deploy.
+- **Logging:** NestJS `Logger` ghi ra stdout dạng một dòng/request (method, path, status, thời gian, requestId); không ghi mật khẩu, token. Docker thu stdout làm log (`docker compose logs` trên máy server).
+- **Health check:** `GET /health` trả `{ status: "ok", db: "up", version: <GIT_SHA> }`, chạy `SELECT 1` tới DB; trả 503 nếu DB lỗi. Dùng cho Docker `HEALTHCHECK`, `docker compose up --wait` và smoke test sau deploy.
 - **Cấu hình:** `@nestjs/config` đọc biến môi trường, validate khi khởi động (thiếu `DATABASE_URL`/`JWT_SECRET` thì dừng). `.env.example` liệt kê đủ biến nhưng không có giá trị thật. Web chỉ nhận biến công khai `NEXT_PUBLIC_API_URL`.
 
 ## 5. Lý do chọn, ưu điểm, hạn chế và trade-off
@@ -59,7 +59,7 @@ Frontend cũng chia lớp: `app/` (route, trang) → `components/` (UI) → `lib
 | State machine tập trung + UPDATE có điều kiện | Nhiều nơi đổi trạng thái, tranh chấp | Chặn chuyển sai, chống bấm trùng | Thêm trạng thái phải sửa nhiều sơ đồ | 003 |
 | Idempotency-Key + UNIQUE | Chống trừ tiền 2 lần | Đúng cả khi đồng thời | Phải dọn payment PENDING treo | 004 |
 | Optimistic locking cho kho | Đặt đồng thời | Không khóa dài | Có thể báo thử lại khi tranh chấp cao | 005 |
-| Vercel + Render + GHCR | Miễn phí, HTTPS sẵn | Image theo SHA, rollback được | Cold start, rollback 2 nơi | 006 |
+| Máy nhóm + Tailscale Funnel + GHCR | Miễn phí, HTTPS sẵn, nhóm đã dùng Tailscale | Image theo SHA, rollback một lệnh, không cold start | Máy server phải bật khi chấm | 006 |
 | Prisma migration | Tái tạo DB ở mọi môi trường | Schema trong Git | SQL đặc thù viết raw | 007 |
 | Mock payment sau interface | Đề yêu cầu mô phỏng | Test được nhánh lỗi, không cần mạng | Không kiểm chứng cổng thật | 008 |
 
@@ -72,6 +72,6 @@ Frontend cũng chia lớp: `app/` (route, trang) → `components/` (UI) → `lib
 | ADR-003 | State machine trạng thái đơn | [adr/003-order-state-machine.md](adr/003-order-state-machine.md) |
 | ADR-004 | Thanh toán idempotent | [adr/004-idempotent-payment.md](adr/004-idempotent-payment.md) |
 | ADR-005 | Tồn kho: transaction + optimistic locking | [adr/005-inventory-optimistic-locking.md](adr/005-inventory-optimistic-locking.md) |
-| ADR-006 | Triển khai Vercel + Render + GHCR | [adr/006-deploy-vercel-render-ghcr.md](adr/006-deploy-vercel-render-ghcr.md) |
+| ADR-006 | Triển khai máy nhóm + Tailscale Funnel + GHCR | [adr/006-deploy-tailscale-funnel-ghcr.md](adr/006-deploy-tailscale-funnel-ghcr.md) |
 | ADR-007 | Prisma migration | [adr/007-prisma-migration.md](adr/007-prisma-migration.md) |
 | ADR-008 | Mock payment gateway | [adr/008-mock-payment-gateway.md](adr/008-mock-payment-gateway.md) |

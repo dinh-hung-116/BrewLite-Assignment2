@@ -35,7 +35,7 @@ Sprint Goal: hoàn thành luồng menu → giỏ → đặt đơn → thanh toá
 | S2-10 | `GET /health` kiểm tra DB | NFR-04 | M | Xong | #5 |
 | S2-11 | Integration test PostgreSQL, E2E Playwright | NFR-05 | M | Xong | #5 |
 | S2-12 | `docker-compose.yml` chạy web, API, DB | NFR-06 | M | Xong | #5 |
-| S2-13 | CD: image tag SHA → GHCR → Render/Vercel → smoke test → rollback | NFR-04, NFR-06 | M | Xong (pipeline), chờ bật deploy | #5 |
+| S2-13 | CD: image tag SHA → GHCR → máy server (Tailscale Funnel) → smoke test → rollback | NFR-04, NFR-06 | M | Xong (pipeline), chờ bật deploy | #5 |
 | S2-14 | Sửa header bị cắt trên điện thoại | NFR-03 | M | Xong | commit trên `main` |
 | S2-15 | Release v1.0.0, release notes, Sprint Review, Retrospective | – | M | Xong (tài liệu), chờ gắn tag | – |
 | S2-16 | URL production + video demo | NFR-04 | M | Chưa làm | – |
