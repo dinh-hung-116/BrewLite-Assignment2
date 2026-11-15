@@ -1,0 +1,25 @@
+@startuml use-case-checkout
+' Use case diagram cho phạm vi UC-06 + UC-08 (Task 1.3)
+left to right direction
+skinparam shadowing false
+actor "Khách hàng" as Customer
+actor "Cổng thanh toán\n(mô phỏng)" as Pay
+rectangle "BrewLite – Đặt và thanh toán" {
+  usecase "UC-06 Đặt đơn hàng" as UC06
+  usecase "UC-05 Đăng nhập" as UC05
+  usecase "UC-07 Áp mã khuyến mãi" as UC07
+  usecase "UC-08 Thanh toán Ví/Thẻ" as UC08
+  usecase "UC-09 Xem xác nhận\nvà theo dõi đơn" as UC09
+}
+Customer --> UC06
+Customer --> UC08
+Customer --> UC09
+UC08 --> Pay
+UC06 ..> UC05 : <<include>>
+UC07 ..> UC06 : <<extend>>\n(bước 3: nhập mã)
+UC08 ..> UC06 : <<include>>
+note bottom of UC08
+  Idempotency-Key cho mỗi lần bấm.
+  Thẻ đuôi 0002 => thất bại (demo).
+end note
+@enduml

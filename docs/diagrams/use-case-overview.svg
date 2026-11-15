@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1177px" preserveAspectRatio="none" style="width:987px;height:1177px;" version="1.1" viewBox="0 0 987 1177" width="987px" zoomAndPan="magnify"><defs/><g><!--MD5=[8b0de7075b6081d97caf2aee1d94c2a6]
+cluster BrewLite--><rect fill="#FFFFFF" height="792" style="stroke: #000000; stroke-width: 1.5;" width="820" x="156" y="30.41"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="60" x="536" y="45.9725">BrewLite</text><ellipse cx="282.9119" cy="470.1924" fill="#FEFECE" rx="74.4119" ry="17.2824" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="115" x="225.4119" y="475.1621">UC-01 Xem menu</text><ellipse cx="282.9432" cy="549.2873" fill="#FEFECE" rx="89.9432" ry="26.3773" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="126" x="219.9432" y="546.6161">UC-02 Xem chi tiết</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="113" x="226.4432" y="563.5555">và chọn tùy chọn</text><ellipse cx="283.0758" cy="632.4252" fill="#FEFECE" rx="93.0758" ry="21.0152" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="159" x="203.5758" y="637.3949">UC-03 Quản lý giỏ hàng</text><ellipse cx="283.1758" cy="705.2452" fill="#FEFECE" rx="69.6758" ry="16.3352" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="103" x="231.6758" y="710.2149">UC-04 Đăng ký</text><ellipse cx="883.4398" cy="788.598" fill="#FEFECE" rx="76.4398" ry="17.688" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="120" x="823.4398" y="793.5677">UC-05 Đăng nhập</text><ellipse cx="600.5336" cy="356.5167" fill="#FEFECE" rx="83.5336" ry="19.1067" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="137" x="532.0336" y="361.4864">UC-06 Đặt đơn hàng</text><ellipse cx="283.018" cy="316.3136" fill="#FEFECE" rx="97.518" ry="21.9036" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="169" x="198.518" y="321.2833">UC-07 Áp mã khuyến mãi</text><ellipse cx="283.018" cy="395.3136" fill="#FEFECE" rx="97.518" ry="21.9036" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="169" x="198.518" y="400.2833">UC-08 Thanh toán Ví/Thẻ</text><ellipse cx="283.0294" cy="233.4632" fill="#FEFECE" rx="97.5294" ry="25.5532" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="142" x="212.0294" y="232.013">UC-09 Xem xác nhận</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="102" x="232.0294" y="248.9525">và theo dõi đơn</text><ellipse cx="283.1302" cy="152.636" fill="#FEFECE" rx="89.1302" ry="20.226" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="150" x="208.1302" y="157.6058">UC-10 Xem lịch sử đơn</text><ellipse cx="282.8868" cy="81.2874" fill="#FEFECE" rx="67.3868" ry="15.8774" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="97" x="234.3868" y="86.2571">UC-11 Hủy đơn</text><ellipse cx="282.7642" cy="781.4628" fill="#FEFECE" rx="110.7642" ry="24.5528" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="172" x="196.7642" y="781.9144">UC-12 Cập nhật trạng thái</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="53" x="256.2642" y="798.8539">pha chế</text><!--MD5=[9eecb807d8a7c1ba44cb916f191401d3]
+entity Guest--><ellipse cx="57.5" cy="566.41" fill="#FEFECE" rx="8" ry="8" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M57.5,574.41 L57.5,601.41 M44.5,582.41 L70.5,582.41 M57.5,601.41 L44.5,616.41 M57.5,601.41 L70.5,616.41 " fill="none" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="96" x="9.5" y="632.4725">Khách vãng lai</text><!--MD5=[ae78ca0dd1f49bdd788e5556d70823ac]
+entity Customer--><ellipse cx="57.5" cy="163.41" fill="#FEFECE" rx="8" ry="8" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M57.5,171.41 L57.5,198.41 M44.5,179.41 L70.5,179.41 M57.5,198.41 L44.5,213.41 M57.5,198.41 L70.5,213.41 " fill="none" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="78" x="18.5" y="229.4725">Khách hàng</text><!--MD5=[75bcab72e22e3bde62d8cef4f1a817de]
+entity Staff--><ellipse cx="57.5" cy="930.41" fill="#FEFECE" rx="8" ry="8" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M57.5,938.41 L57.5,965.41 M44.5,946.41 L70.5,946.41 M57.5,965.41 L44.5,980.41 M57.5,965.41 L70.5,980.41 " fill="none" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="103" x="6" y="996.4725">Nhân viên quầy</text><!--MD5=[fe6623bf13935812ad18bb285f32fe18]
+entity Pay--><ellipse cx="600.5" cy="847.91" fill="#FEFECE" rx="8" ry="8" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M600.5,855.91 L600.5,882.91 M587.5,863.91 L613.5,863.91 M600.5,882.91 L587.5,897.91 M600.5,882.91 L613.5,897.91 " fill="none" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="109" x="546" y="913.9725">Cổng thanh toán</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="76" x="546" y="930.912">(mô phỏng)</text><!--MD5=[0671367157f665efbfb5661a5c89afba]
+link Customer to Guest--><path d="M57.5,233.14 C57.5,334.24 57.5,435.34 57.5,536.44 " fill="none" id="Customer-&gt;Guest" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="64.5,536.66,57.5,556.66,50.5,536.66,64.5,536.66" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[5c7691d45421e4ecf6f1c5d791fe84af]
+link Guest to UC01--><path d="M89.16,556.54 C104.94,538.52 125.56,518.39 148,505.41 C168.12,493.76 192.16,485.92 214.28,480.67 " fill="none" id="Guest-&gt;UC01" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="219.27,479.52,209.5994,477.6545,214.399,480.6485,211.405,485.448,219.27,479.52" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[7c5e2822d2b041ed552cec0192d18b73]
+link Guest to UC02--><path d="M105.63,586.5 C134.19,580.49 171.35,572.67 204.18,565.77 " fill="none" id="Guest-&gt;UC02" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="209.41,564.67,199.779,562.6099,204.5173,565.7001,201.4271,570.4383,209.41,564.67" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[af4fbd310b3bf75f956ebf7796ca9cf5]
+link Guest to UC03--><path d="M105.63,604 C133.46,608.48 169.46,614.28 201.66,619.46 " fill="none" id="Guest-&gt;UC03" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="206.79,620.29,198.5472,614.8997,201.8546,619.4889,197.2654,622.7963,206.79,620.29" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[877ecd28de31da42e21ed148c9861647]
+link Guest to UC04--><path d="M99.04,636.27 C113.53,648.71 130.59,661.49 148,670.41 C170.28,681.81 196.6,689.73 219.98,695.11 " fill="none" id="Guest-&gt;UC04" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="224.93,696.22,217.0321,690.3359,220.0528,695.1187,215.27,698.1394,224.93,696.22" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[485632ec6c07c579f2fe8a676395b0b8]
+link Guest to UC05--><path d="M63.89,636.06 C72.74,686.31 95.02,772.46 148,823.41 C273.23,943.82 345.72,923.33 517,952.41 C590.18,964.83 614.16,977.53 684,952.41 C763.95,923.65 834.61,847.19 865.69,809.71 " fill="none" id="Guest-&gt;UC05" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="868.93,805.77,860.1146,810.162,865.746,809.6251,866.2828,815.2564,868.93,805.77" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[cd863300b8e0893154763126d3dfd954]
+link Customer to UC06--><path d="M70.52,153.67 C83.46,118.69 107.79,69.92 148,47.41 C243.4,-6.01 297.63,-4.24 394,47.41 C510.54,109.86 572.3,270.77 592.21,332.14 " fill="none" id="Customer-&gt;UC06" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="593.79,337.07,594.8717,327.2807,592.2734,332.3056,587.2486,329.7073,593.79,337.07" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[67975e665c39d8a08223b34dc2c2ffb1]
+link Customer to UC08--><path d="M70.68,233.15 C83.95,270 108.71,323.76 148,355.41 C162.43,367.03 180.17,375.28 197.96,381.13 " fill="none" id="Customer-&gt;UC08" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="202.97,382.72,195.5839,376.205,198.2001,381.2205,193.1847,383.8368,202.97,382.72" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[6df6452ba1c996562f74e04e7ff45350]
+link Customer to UC09--><path d="M96.67,200.24 C124.12,205.15 162.23,211.97 196.76,218.15 " fill="none" id="Customer-&gt;UC09" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="201.83,219.06,193.6639,213.5541,196.9064,218.1894,192.271,221.4319,201.83,219.06" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[32918ab36956c1b776677f412281c3cd]
+link Customer to UC10--><path d="M96.67,186.4 C127.21,180.8 170.96,172.77 208.28,165.93 " fill="none" id="Customer-&gt;UC10" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="213.27,165.01,203.6979,162.6918,208.3513,165.9082,205.135,170.5617,213.27,165.01" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[121f433d8a288d96afce64143cd49fd0]
+link Customer to UC11--><path d="M95.49,153.5 C110.55,139.32 128.9,124.4 148,114.41 C169.9,102.94 195.91,95.36 219.16,90.39 " fill="none" id="Customer-&gt;UC11" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="224.08,89.37,214.4502,87.3042,219.1866,90.3972,216.0937,95.1336,224.08,89.37" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[2e35373de6d4a9bcb5a828a9da7c2b5b]
+link Staff to UC05--><path d="M109.11,999.94 C118.58,1005.48 128.74,1010.33 139,1013.41 C410.62,1094.79 537.69,1165.51 777,1013.41 C848.87,967.72 872.63,858.72 879.74,811.2 " fill="none" id="Staff-&gt;UC05" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="880.49,805.99,875.2439,814.3254,879.7749,810.9386,883.1617,815.4696,880.49,805.99" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[189ada55ce2af7418e155a41db2c216d]
+link Staff to UC12--><path d="M107.82,920.9 C150.49,886.73 211.03,838.24 248.35,808.36 " fill="none" id="Staff-&gt;UC12" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="252.33,805.17,242.8012,807.6603,248.4229,808.29,247.7931,813.9117,252.33,805.17" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[d5b2a8e8438e1950cdbd67b7912ac042]
+link UC08 to Pay--><path d="M354.81,410.4 C369.27,416.21 383.31,424.26 394,435.41 C518.97,565.61 413.7,674.41 517,822.41 C523.81,832.16 532.55,841.12 541.78,849.05 " fill="none" id="UC08-&gt;Pay" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="545.76,852.39,541.4035,843.557,541.9177,849.1905,536.2843,849.7047,545.76,852.39" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[62fb3c97be59783b41c4bb92169a8a42]
+link UC06 to UC05--><path d="M613.75,375.25 C659.43,445.46 819.63,691.74 868.34,766.64 " fill="none" id="UC06-&gt;UC05" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#A80036" points="871.12,770.91,869.5712,761.1837,868.3961,766.7171,862.8626,765.542,871.12,770.91" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="61" x="715" y="531.0038">«include»</text><!--MD5=[ed8b41e44f2689165935a961ce258dfc]
+link UC07 to UC06--><path d="M368.55,327.12 C416.36,333.19 475.71,340.71 522.26,346.61 " fill="none" id="UC07-&gt;UC06" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#A80036" points="527.3,347.25,518.8747,342.1496,522.3397,346.621,517.8683,350.0861,527.3,347.25" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="59" x="426" y="332.0037">«extend»</text><!--MD5=[714cb7ff1d11af2b818682d694af391c]
+link UC08 to UC06--><path d="M380.47,396.12 C414.32,395.18 452.5,392.77 487,387.41 C506.95,384.31 528.41,378.92 547.18,373.51 " fill="none" id="UC08-&gt;UC06" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#A80036" points="552.4,371.98,542.64,370.66,547.6,373.38,544.88,378.34,552.4,371.98" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="61" x="425" y="384.0037">«include»</text><!--MD5=[801490d6d24d912975e4b878f772a6a6]
+@startuml use-case-overview
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+actor "Khách vãng lai" as Guest
+actor "Khách hàng" as Customer
+actor "Nhân viên quầy" as Staff
+actor "Cổng thanh toán\n(mô phỏng)" as Pay
+Customer -|> Guest
+
+rectangle "BrewLite" {
+  usecase "UC-01 Xem menu" as UC01
+  usecase "UC-02 Xem chi tiết\nvà chọn tùy chọn" as UC02
+  usecase "UC-03 Quản lý giỏ hàng" as UC03
+  usecase "UC-04 Đăng ký" as UC04
+  usecase "UC-05 Đăng nhập" as UC05
+  usecase "UC-06 Đặt đơn hàng" as UC06
+  usecase "UC-07 Áp mã khuyến mãi" as UC07
+  usecase "UC-08 Thanh toán Ví/Thẻ" as UC08
+  usecase "UC-09 Xem xác nhận\nvà theo dõi đơn" as UC09
+  usecase "UC-10 Xem lịch sử đơn" as UC10
+  usecase "UC-11 Hủy đơn" as UC11
+  usecase "UC-12 Cập nhật trạng thái\npha chế" as UC12
+}
+
+Guest - -> UC01
+Guest - -> UC02
+Guest - -> UC03
+Guest - -> UC04
+Guest - -> UC05
+Customer - -> UC06
+Customer - -> UC08
+Customer - -> UC09
+Customer - -> UC10
+Customer - -> UC11
+Staff - -> UC05
+Staff - -> UC12
+UC08 - -> Pay
+
+UC06 ..> UC05 : <<include>>
+UC07 ..> UC06 : <<extend>>
+UC08 ..> UC06 : <<include>>
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.12.1+1-1-24.04.4-Ubuntu
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
