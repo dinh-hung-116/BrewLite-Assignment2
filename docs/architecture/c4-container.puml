@@ -1,0 +1,17 @@
+@startuml c4-container
+' C4 mức 2 – Container
+skinparam shadowing false
+actor "Khách hàng" as C
+actor "Nhân viên quầy" as S
+rectangle "BrewLite" {
+  rectangle "Web App\n[Container: Next.js, React, PWA]\napps/web\nMenu, giỏ hàng, thanh toán,\ntheo dõi đơn, màn hình quầy" as WEB
+  rectangle "API\n[Container: NestJS, Node.js]\napps/api\nREST JSON, JWT, nghiệp vụ đơn,\nthanh toán, tồn kho" as API
+  database "Database\n[Container: PostgreSQL]\nPrisma migration + seed" as DB
+  rectangle "Mock Payment Service\n[Component trong API]\nPaymentGateway interface" as PAY
+}
+C --> WEB : HTTPS
+S --> WEB : HTTPS
+WEB --> API : REST/JSON qua HTTPS\nAuthorization: Bearer JWT
+API --> DB : Prisma (TCP 5432, mạng nội bộ)
+API --> PAY : charge() + Idempotency-Key
+@enduml

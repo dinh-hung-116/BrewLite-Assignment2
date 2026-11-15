@@ -1,0 +1,17 @@
+@startuml c4-context
+' C4 mức 1 – System Context
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor<<system>> #1168BD
+  FontColor<<system>> white
+  BackgroundColor<<external>> #999999
+  FontColor<<external>> white
+}
+actor "Khách hàng\n[Person]\nĐặt và thanh toán đồ uống\ntrên điện thoại" as C
+actor "Nhân viên quầy\n[Person]\nNhận và cập nhật đơn" as S
+rectangle "BrewLite\n[Software System]\nĐặt đồ uống không tiền mặt,\ntheo dõi trạng thái pha chế" <<system>> as B
+rectangle "Payment Service\n[External, mô phỏng]\nXử lý Ví/Thẻ" <<external>> as P
+C --> B : Xem menu, đặt đơn,\nthanh toán (HTTPS)
+S --> B : Cập nhật trạng thái\n(HTTPS)
+B --> P : Yêu cầu thanh toán\n(Idempotency-Key)
+@enduml

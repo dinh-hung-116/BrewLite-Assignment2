@@ -1,0 +1,47 @@
+@startuml deployment
+' UML Deployment diagram – production (Task 3.2)
+skinparam shadowing false
+left to right direction
+
+node "Thiết bị người dùng" as Dev {
+  node "Trình duyệt di động / PWA" as Browser
+}
+
+node "GitHub" as GH {
+  node "GitHub Actions runner\n<<CI/CD>>" as Runner {
+    artifact "ci.yml / cd.yml" as WF
+  }
+  node "GitHub Container Registry\nghcr.io" as GHCR {
+    artifact "brewlite-api:<commit-sha>" as Img
+  }
+  node "GitHub Secrets" as Sec
+}
+
+node "Vercel (Edge Network / CDN)" as Vercel {
+  artifact "apps/web\nNext.js build (SSR + static)" as WebArt
+}
+
+node "Render – region Singapore" as Render {
+  node "Web Service (Docker container)\nport 3001 nội bộ" as ApiNode {
+    artifact "brewlite-api:<commit-sha>\nNestJS + Prisma" as ApiArt
+    component "GET /health" as Health
+    component "stdout log (JSON)" as Log
+  }
+  database "Render PostgreSQL 16\npersistent disk\n(không public)" as PG
+}
+
+Browser --> WebArt : HTTPS 443
+Browser --> ApiArt : HTTPS 443 (REST, CORS)
+ApiArt --> PG : TCP 5432 internal URL\nDATABASE_URL (secret)
+Runner --> GHCR : docker push (tag = SHA)
+Runner --> ApiNode : Deploy Hook (secret)\nprisma migrate deploy
+Runner --> Vercel : vercel deploy --prod\n(VERCEL_TOKEN)
+Runner --> Health : smoke test sau deploy
+GHCR --> ApiNode : pull image
+Sec ..> Runner : RENDER_DEPLOY_HOOK_URL,\nVERCEL_TOKEN, GHCR token
+
+note bottom of ApiNode
+  Env: DATABASE_URL, JWT_SECRET, CORS_ORIGIN,
+  NODE_ENV=production (khai báo trên Render, không nằm trong repo)
+end note
+@enduml
