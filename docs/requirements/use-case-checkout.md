@@ -11,15 +11,15 @@ Nguồn: [`docs/diagrams/use-case-checkout.puml`](../diagrams/use-case-checkout.
 | Mục | Nội dung |
 |---|---|
 | Mã use case | UC-06 + UC-08 |
-| Tên | Đặt và thanh toán đơn hàng (UC-06 Đặt đơn hàng gộp với UC-08 Thanh toán Ví/Thẻ thành một luồng) |
+| Tên | Đặt và thanh toán đơn hàng (UC-06 Đặt đơn hàng gộp với UC-08 Thanh toán đơn thành một luồng) |
 | Actor chính | Khách hàng (đã đăng nhập) |
-| Actor phụ | Cổng thanh toán mô phỏng (Mock Payment Service) |
+| Actor phụ | Cổng thanh toán: VNPay sandbox hoặc cổng mô phỏng Ví/Thẻ (Mock Payment Service, mặc định khi demo) |
 | Tóm tắt | Khách đặt các món trong giỏ và thanh toán xong để quầy bắt đầu pha chế. |
 | Trigger | Khách bấm "Thanh toán" ở trang giỏ hàng. |
 | Tiền điều kiện | Giỏ hàng có ít nhất 1 món; khách đã đăng nhập (chưa thì chuyển sang đăng nhập rồi quay lại); các món còn bán. |
 | Hậu điều kiện – thành công | Đơn PAID; nguyên liệu đã được giữ chỗ; có đúng 1 giao dịch SUCCEEDED; khách được cộng điểm; giỏ hàng được xóa. |
 | Hậu điều kiện – thất bại | Đơn PAYMENT_FAILED, giỏ giữ nguyên, khách thanh toán lại được cùng đơn trong hạn 15 phút; hoặc không tạo đơn nào nếu lỗi ở bước tạo đơn. |
-| Quan hệ | UC-06 «include» UC-05 Đăng nhập; UC-07 Áp mã khuyến mãi «extend» UC-06 tại bước 3; UC-08 «include» UC-06. |
+| Quan hệ | UC-06 «include» UC-05 Đăng nhập; UC-07 Áp mã khuyến mãi «extend» UC-06 tại bước 3; UC-08 «include» UC-06 và UC-17 Cộng điểm thưởng; UC-06 «include» UC-18 Giữ chỗ nguyên liệu; UC-13 Thanh toán lại «include» UC-08. User Story A1: US-05, US-06, US-07, US-08, US-09, US-16, US-18. |
 | Yêu cầu liên quan | FR-04, FR-05, FR-06, FR-07, FR-08, FR-11, FR-12, FR-13, FR-14; NFR-01, NFR-02, NFR-05 |
 
 ### 2.1 Luồng chính

@@ -11,7 +11,7 @@ Phạm vi và stakeholder: xem [context-and-scope.md](context-and-scope.md). M�
 | FR-03 | Giỏ hàng | Khách thêm, sửa số lượng, xóa món; tổng tiền và badge số lượng tự cập nhật; giỏ còn sau khi tải lại trang. | M | Thêm 2 món khác tùy chọn tạo 2 dòng; cùng tùy chọn thì cộng số lượng; tải lại trang giỏ không mất. |
 | FR-04 | Xác thực | Đăng ký bằng email + mật khẩu (≥ 6 ký tự), đăng nhập nhận JWT; route đặt đơn, thanh toán, lịch sử yêu cầu JWT. | M | `POST /auth/register` trả 201, email trùng 409; `POST /auth/login` sai mật khẩu 401; gọi `POST /orders` không token trả 401. |
 | FR-05 | Đặt đơn | Khách đã đăng nhập tạo đơn từ giỏ; backend validate và tự tính lại giá từ CSDL; đơn ở trạng thái PENDING, có mã đơn. | M | `POST /orders` trả 201 với `orderCode` dạng `#1001`, `status = PENDING`, `total` đúng theo BR-01 dù client gửi giá sai; giỏ rỗng hoặc số lượng ngoài 1–20 trả 400. |
-| FR-06 | Thanh toán | Khách thanh toán đơn PENDING bằng Ví điện tử hoặc Thẻ qua dịch vụ thanh toán **mô phỏng**; thành công → PAID, thất bại → PAYMENT_FAILED, cho thanh toán lại. | M | `POST /payments` với thẻ đuôi `0002` trả kết quả FAILED và đơn PAYMENT_FAILED, giỏ giữ nguyên; thẻ/ví hợp lệ trả SUCCEEDED và đơn PAID. |
+| FR-06 | Thanh toán | Khách thanh toán đơn PENDING qua VNPay sandbox (`PAYMENT_PROVIDER=vnpay`) hoặc Ví điện tử/Thẻ qua dịch vụ thanh toán **mô phỏng** (mặc định khi demo); thành công → PAID, thất bại → PAYMENT_FAILED, cho thanh toán lại. | M | `POST /payments` với thẻ đuôi `0002` trả kết quả FAILED và đơn PAYMENT_FAILED, giỏ giữ nguyên; thẻ/ví hợp lệ trả SUCCEEDED và đơn PAID. |
 | FR-07 | Thanh toán idempotent | Mỗi lần bấm thanh toán gửi một `Idempotency-Key`; gửi lại cùng key không tạo thêm giao dịch. | M | Gửi 2 request cùng key (kể cả đồng thời) → bảng `payments` chỉ có 1 bản ghi, response giống nhau. |
 | FR-08 | Xác nhận và theo dõi | Sau thanh toán hiển thị mã đơn, trạng thái, tổng tiền; trang chi tiết đơn tự cập nhật trạng thái. | M | Trang `/orders/[code]` đổi từ PAID sang PREPARING trong ≤ 10 giây sau khi quầy bấm "Nhận đơn". |
 | FR-09 | Lịch sử đơn | Khách xem danh sách đơn của chính mình, mới nhất trước. | M | `GET /orders/me` chỉ trả đơn của user trong JWT; xem đơn của người khác trả 404. |
@@ -50,19 +50,28 @@ Nguồn: [`docs/diagrams/use-case-overview.puml`](../diagrams/use-case-overview.
 
 ![Use case tổng quát](../diagrams/use-case-overview.svg)
 
-| Mã | Use case | Actor | Yêu cầu |
-|---|---|---|---|
-| UC-01 | Xem menu | Khách vãng lai | FR-01 |
-| UC-02 | Xem chi tiết và chọn tùy chọn | Khách vãng lai | FR-02 |
-| UC-03 | Quản lý giỏ hàng | Khách vãng lai | FR-03 |
-| UC-04 | Đăng ký tài khoản | Khách vãng lai | FR-04 |
-| UC-05 | Đăng nhập | Khách vãng lai, Nhân viên quầy | FR-04 |
-| UC-06 | Đặt đơn hàng | Khách hàng | FR-05, FR-13 |
-| UC-07 | Áp mã khuyến mãi («extend» UC-06) | Khách hàng | FR-11 |
-| UC-08 | Thanh toán Ví/Thẻ | Khách hàng, Cổng thanh toán mô phỏng | FR-06, FR-07, FR-12 |
-| UC-09 | Xem xác nhận và theo dõi đơn | Khách hàng | FR-08 |
-| UC-10 | Xem lịch sử đơn | Khách hàng | FR-09 |
-| UC-11 | Hủy đơn | Khách hàng | FR-14 |
-| UC-12 | Cập nhật trạng thái pha chế | Nhân viên quầy | FR-10 |
+Các use case được dựng từ 19 User Story (US-01 đến US-19) của báo cáo Assignment 1, mục 4.3; tiêu chí chấp nhận chi tiết của từng User Story xem tại đó. Cột "User Story" cho biết use case hiện thực User Story nào.
 
-Khách hàng kế thừa Khách vãng lai. Use case trọng tâm UC-06 + UC-08 được đặc tả ở [use-case-checkout.md](use-case-checkout.md).
+| Mã | Use case | Actor | User Story (A1) | Yêu cầu |
+|---|---|---|---|---|
+| UC-01 | Xem menu | Khách hàng | US-01 | FR-01 |
+| UC-02 | Xem chi tiết, chọn size/topping | Khách hàng | US-02 | FR-02 |
+| UC-03 | Quản lý giỏ hàng | Khách hàng | US-03 | FR-03 |
+| UC-04 | Đăng ký tài khoản | Khách hàng | US-04 | FR-04 |
+| UC-05 | Đăng nhập | Khách hàng, Nhân viên quầy | US-04 | FR-04 |
+| UC-06 | Đặt đơn hàng («include» UC-05, UC-18) | Khách hàng | US-06 | FR-05 |
+| UC-07 | Áp mã khuyến mãi («extend» UC-06) | Khách hàng | US-05 | FR-11 |
+| UC-08 | Thanh toán đơn («include» UC-06, UC-17) | Khách hàng, Cổng thanh toán (VNPay sandbox / mô phỏng) | US-07, US-18 | FR-06, FR-07 |
+| UC-09 | Xem xác nhận và chi tiết đơn | Khách hàng | US-08 | FR-08 |
+| UC-10 | Xem lịch sử và trạng thái đơn | Khách hàng | US-10 | FR-08, FR-09 |
+| UC-11 | Hủy đơn («include» UC-19) | Khách hàng | US-11 | FR-14 |
+| UC-12 | Cập nhật trạng thái pha chế | Nhân viên quầy | US-14 | FR-10 |
+| UC-13 | Thanh toán lại («include» UC-08) | Khách hàng | US-09 | FR-06, FR-07 |
+| UC-14 | Xem hàng đợi pha chế | Nhân viên quầy | US-13 | FR-10 |
+| UC-15 | Hủy đơn tại quầy («include» UC-19) | Nhân viên quầy | US-15 | FR-10, FR-14 |
+| UC-16 | Tự hủy đơn quá hạn («include» UC-19) | Bộ hẹn giờ (Scheduler) | US-17 | FR-14 |
+| UC-17 | Cộng điểm thưởng | Hệ thống (được UC-08 gọi) | US-12, US-18 | FR-12 |
+| UC-18 | Giữ chỗ nguyên liệu | Hệ thống (được UC-06 gọi) | US-16, US-19 | FR-13, NFR-05 |
+| UC-19 | Hoàn trả nguyên liệu | Hệ thống (được UC-11, UC-15, UC-16 gọi) | US-11, US-15, US-17 | FR-13, FR-14 |
+
+Phần xem menu, giỏ hàng, đăng ký không cần đăng nhập; đặt đơn trở đi bắt buộc đăng nhập (UC-06 «include» UC-05). Idempotency (US-18) và optimistic locking (US-19) là ràng buộc toàn vẹn, đặc tả ở NFR-05. Use case trọng tâm UC-06 + UC-08 được đặc tả ở [use-case-checkout.md](use-case-checkout.md).
