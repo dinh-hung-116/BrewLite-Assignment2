@@ -24,7 +24,7 @@ Có điểm bắt đầu/kết thúc, 4 swimlane (Khách hàng, Hệ thống, C�
 
 ![Sequence](sequence-checkout.svg)
 
-Lifeline: Customer → Next.js UI → NestJS API → Database → Payment Service. Thể hiện thứ tự gọi `POST /orders` rồi `POST /payments`; kiểm tra JWT (bước 3) và validate (bước 6); transaction tạo đơn + giữ nguyên liệu với optimistic locking (bước 11–16); `alt` thanh toán thành công/thất bại; idempotency khi client gửi lại cùng `Idempotency-Key` (bước 20–21); thông báo kết quả cuối cho người dùng.
+Lifeline: Customer → Next.js UI → NestJS API → Database → Payment Service. Thể hiện thứ tự gọi `POST /orders` rồi `POST /api/payment/create/{code}` và `POST /api/payment/mock/confirm`; kiểm tra JWT (bước 3) và validate (bước 6); transaction tạo đơn + giữ nguyên liệu với optimistic locking (bước 11–16); `alt` thanh toán thành công/thất bại; idempotency khi client gửi lại cùng `Idempotency-Key` (bước 20–21); thông báo kết quả cuối cho người dùng.
 
 ## Class-01
 
