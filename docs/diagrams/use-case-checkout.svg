@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="417px" preserveAspectRatio="none" style="width:1031px;height:417px;" version="1.1" viewBox="0 0 1031 417" width="1031px" zoomAndPan="magnify"><defs/><g><!--MD5=[ecd0288e65bf7c8a9978678ec69d1efb]
+cluster BrewLite - Đặt và thanh toán--><rect fill="#FFFFFF" height="261" style="stroke: #000000; stroke-width: 1.5;" width="868.5" x="151.5" y="119.53"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="192" x="489.75" y="135.0925">BrewLite - Đặt và thanh toán</text><ellipse cx="644.5336" cy="255.6367" fill="#FEFECE" rx="83.5336" ry="19.1067" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="137" x="576.0336" y="260.6064">UC-06 Đặt đơn hàng</text><ellipse cx="927.4398" cy="255.718" fill="#FEFECE" rx="76.4398" ry="17.688" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="120" x="867.4398" y="260.6877">UC-05 Đăng nhập</text><ellipse cx="265.018" cy="255.4336" fill="#FEFECE" rx="97.518" ry="21.9036" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="169" x="180.518" y="260.4033">UC-07 Áp mã khuyến mãi</text><ellipse cx="265.018" cy="176.4336" fill="#FEFECE" rx="97.518" ry="21.9036" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="169" x="180.518" y="181.4033">UC-08 Thanh toán Ví/Thẻ</text><ellipse cx="265.0294" cy="338.5832" fill="#FEFECE" rx="97.5294" ry="25.5532" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="142" x="194.0294" y="337.133">UC-09 Xem xác nhận</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="102" x="214.0294" y="354.0725">và theo dõi đơn</text><!--MD5=[ae78ca0dd1f49bdd788e5556d70823ac]
+entity Customer--><ellipse cx="45" cy="308.53" fill="#FEFECE" rx="8" ry="8" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M45,316.53 L45,343.53 M32,324.53 L58,324.53 M45,343.53 L32,358.53 M45,343.53 L58,358.53 " fill="none" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="78" x="6" y="374.5925">Khách hàng</text><!--MD5=[fe6623bf13935812ad18bb285f32fe18]
+entity Pay--><ellipse cx="644.5" cy="17.03" fill="#FEFECE" rx="8" ry="8" style="stroke: #A80036; stroke-width: 1.5;"/><path d="M644.5,25.03 L644.5,52.03 M631.5,33.03 L657.5,33.03 M644.5,52.03 L631.5,67.03 M644.5,52.03 L657.5,67.03 " fill="none" style="stroke: #A80036; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="109" x="590" y="83.0925">Cổng thanh toán</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="76" x="590" y="100.032">(mô phỏng)</text><path d="M145,62.03 L145,103.489 A0,0 0 0 0 145,103.489 L261,103.489 L265,154.5 L269,103.489 L385,103.489 A0,0 0 0 0 385,103.489 L385,72.03 L375,62.03 L145,62.03 A0,0 0 0 0 145,62.03 " fill="#FBFB77" style="stroke: #A80036; stroke-width: 1.0;"/><path d="M375,62.03 L375,72.03 L385,72.03 L375,62.03 " fill="#FBFB77" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="219" x="151" y="79.6237">Idempotency-Key cho mỗi lần bấm.</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="215" x="151" y="95.3532">Thẻ đuôi 0002 =&gt; thất bại (demo).</text><!--MD5=[cd863300b8e0893154763126d3dfd954]
+link Customer to UC06--><path d="M84.13,359.75 C101.65,368.33 123.04,377.22 143.5,381.53 C248.53,403.66 280.41,405.66 385,381.53 C473.13,361.19 565.98,306.54 612.73,276.32 " fill="none" id="Customer-&gt;UC06" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="617.11,273.48,607.3824,275.0206,612.9148,276.2004,611.735,281.7329,617.11,273.48" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[67975e665c39d8a08223b34dc2c2ffb1]
+link Customer to UC08--><path d="M68.8,298.76 C86.13,271.78 112.27,237.2 143.5,215.53 C157.09,206.1 173.09,198.84 188.92,193.29 " fill="none" id="Customer-&gt;UC08" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="193.83,191.63,184.0203,190.7522,189.0981,193.2454,186.605,198.3232,193.83,191.63" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[6df6452ba1c996562f74e04e7ff45350]
+link Customer to UC09--><path d="M84.22,338.53 C105.95,338.53 134.29,338.53 162.02,338.53 " fill="none" id="Customer-&gt;UC09" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="167.18,338.53,158.18,334.53,162.18,338.53,158.18,342.53,167.18,338.53" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[d5b2a8e8438e1950cdbd67b7912ac042]
+link UC08 to Pay--><path d="M322.11,158.54 C392.61,135.94 513.04,97.34 584.76,74.35 " fill="none" id="UC08-&gt;Pay" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="589.84,72.73,580.0478,71.675,585.0797,74.2596,582.4951,79.2915,589.84,72.73" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[62fb3c97be59783b41c4bb92169a8a42]
+link UC06 to UC05--><path d="M728.29,255.53 C765.17,255.53 808.47,255.53 845.17,255.53 " fill="none" id="UC06-&gt;UC05" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#A80036" points="850.54,255.53,841.54,251.53,845.54,255.53,841.54,259.53,850.54,255.53" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="61" x="759" y="252.1238">«include»</text><!--MD5=[ed8b41e44f2689165935a961ce258dfc]
+link UC07 to UC06--><path d="M362.73,255.53 C422.21,255.53 497.83,255.53 555.6,255.53 " fill="none" id="UC07-&gt;UC06" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#A80036" points="560.79,255.53,551.79,251.53,555.79,255.53,551.79,259.53,560.79,255.53" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="59" x="443.5" y="236.1238">«extend»</text><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="114" x="416" y="251.8532">(bước 3: nhập mã)</text><!--MD5=[714cb7ff1d11af2b818682d694af391c]
+link UC08 to UC06--><path d="M352.02,186.6 C404.21,193.59 471.92,204.23 531,218.53 C552.28,223.68 575.32,230.94 594.97,237.67 " fill="none" id="UC08-&gt;UC06" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#A80036" points="599.89,239.37,592.6831,232.6573,595.1625,237.7418,590.078,240.2212,599.89,239.37" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="61" x="442.5" y="193.1238">«include»</text><!--MD5=[38ac31024edf25d1a5353a4447c4c0f7]
+@startuml use-case-checkout
+left to right direction
+skinparam shadowing false
+actor "Khách hàng" as Customer
+actor "Cổng thanh toán\n(mô phỏng)" as Pay
+rectangle "BrewLite - Đặt và thanh toán" {
+  usecase "UC-06 Đặt đơn hàng" as UC06
+  usecase "UC-05 Đăng nhập" as UC05
+  usecase "UC-07 Áp mã khuyến mãi" as UC07
+  usecase "UC-08 Thanh toán Ví/Thẻ" as UC08
+  usecase "UC-09 Xem xác nhận\nvà theo dõi đơn" as UC09
+}
+Customer - -> UC06
+Customer - -> UC08
+Customer - -> UC09
+UC08 - -> Pay
+UC06 ..> UC05 : <<include>>
+UC07 ..> UC06 : <<extend>>\n(bước 3: nhập mã)
+UC08 ..> UC06 : <<include>>
+note bottom of UC08
+  Idempotency-Key cho mỗi lần bấm.
+  Thẻ đuôi 0002 => thất bại (demo).
+end note
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 10:22:07 UTC 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.12.1+1-1-24.04.4-Ubuntu
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
