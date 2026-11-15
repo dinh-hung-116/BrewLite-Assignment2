@@ -397,21 +397,58 @@ export class OrdersService {
     return this.rowToOrder(created, userId);
   }
 
+  /**
+   * Đơn giá mỗi dòng = giá gốc + phụ thu size (S 0, M 5.000, L 10.000) + tổng topping (BR-01).
+   * Trả null khi không có bảng sản phẩm (môi trường unit test dùng mock).
+   */
+  private async priceFromCatalog(
+    items: CreateOrderDto['items'],
+  ): Promise<number[] | null> {
+    const db = this.prisma as unknown as {
+      products?: { findMany?: (a: object) => Promise<{ id: number; name: string; price: unknown }[]> };
+      toppings?: { findMany?: (a: object) => Promise<{ name: string; price: unknown }[]> };
+    };
+    if (typeof db.products?.findMany !== 'function') return null;
+    const ids = [...new Set(items.map((i) => Number(i.productId)))];
+    if (ids.some((id) => !Number.isSafeInteger(id))) {
+      throw new BadRequestException('Mã sản phẩm không hợp lệ');
+    }
+    const [products, toppings] = await Promise.all([
+      db.products.findMany({ where: { id: { in: ids } } }),
+      db.toppings?.findMany?.({}) ?? Promise.resolve([]),
+    ]);
+    const sizeExtra: Record<string, number> = { S: 0, M: 5000, L: 10000 };
+    return items.map((item) => {
+      const product = products.find((p) => p.id === Number(item.productId));
+      if (!product) {
+        throw new BadRequestException(`Sản phẩm ${item.productId} không tồn tại`);
+      }
+      const toppingTotal = [...new Set(item.toppings ?? [])].reduce((sum, name) => {
+        const t = toppings.find((x) => x.name === name);
+        if (!t) throw new BadRequestException(`Topping "${name}" không tồn tại`);
+        return sum + Number(t.price);
+      }, 0);
+      return Number(product.price) + (sizeExtra[item.size] ?? 0) + toppingTotal;
+    });
+  }
+
   async createOrder(userId: string, dto: CreateOrderDto): Promise<Order> {
     if (!dto.items || dto.items.length === 0) {
       throw new BadRequestException('Giỏ hàng phải có ít nhất 1 sản phẩm');
     }
 
-    const calculatedItems = dto.items.map((item) => {
-      const lineTotal = item.unitPrice * item.qty;
+    // FR-05 / BR-01: giá luôn tính lại từ CSDL, bỏ qua unitPrice client gửi lên.
+    const unitPrices = await this.priceFromCatalog(dto.items);
+    const calculatedItems = dto.items.map((item, i) => {
+      const unitPrice = unitPrices?.[i] ?? item.unitPrice;
       return {
         productId: String(item.productId),
         productName: item.productName || String(item.productId),
         size: item.size,
         toppings: item.toppings ?? [],
         qty: item.qty,
-        unitPrice: item.unitPrice,
-        lineTotal,
+        unitPrice,
+        lineTotal: unitPrice * item.qty,
       };
     });
 

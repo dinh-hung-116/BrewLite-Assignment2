@@ -286,3 +286,31 @@ export const updateOrderStatus = async (
       { method: "PATCH", body: JSON.stringify({ status }) },
     ),
   );
+
+/** POST /api/payment/mock/confirm – cổng thanh toán mô phỏng Ví/Thẻ (ADR-008). */
+export const confirmMockPayment = async (
+  body: {
+    orderCode: string;
+    paymentId: number;
+    method: "WALLET" | "CARD";
+    cardNumber?: string;
+  },
+  accessToken: string,
+) => {
+  const res = await fetch(`${API_URL}/api/payment/mock/confirm`, {
+    method: "POST",
+    cache: "no-store",
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const data = (await res.json().catch(() => null)) as { message?: string | string[] } | null;
+    const msg = Array.isArray(data?.message) ? data.message[0] : data?.message;
+    throw new ApiError(res.status, msg ?? "Không xử lý được thanh toán.");
+  }
+  return (await res.json()) as { orderCode: string; paid: boolean };
+};

@@ -48,6 +48,24 @@ export type CancelPaymentResult = {
   order: OrderRecord;
 };
 
+/** PAYMENT_PROVIDER=vnpay dùng VNPay sandbox; mặc định là cổng mô phỏng (ADR-008). */
+export function isMockProvider(): boolean {
+  return (process.env.PAYMENT_PROVIDER ?? 'mock').toLowerCase() !== 'vnpay';
+}
+
+/** Quy tắc của cổng mô phỏng: ví luôn thành công; thẻ 16 số, đuôi 0002 bị từ chối. */
+export function mockGatewayApproves(
+  method: 'WALLET' | 'CARD',
+  cardNumber?: string,
+): boolean {
+  if (method === 'WALLET') return true;
+  const digits = (cardNumber ?? '').replace(/\s+/g, '');
+  if (!/^\d{16}$/.test(digits)) {
+    throw new BadRequestException('Số thẻ phải gồm 16 chữ số');
+  }
+  return !digits.endsWith('0002');
+}
+
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
@@ -121,7 +139,7 @@ export class PaymentsService {
       where: { idempotencyKey },
     });
     if (existing) {
-      const url = this.buildVnpayUrl(order, existing.id, ipAddress, returnUrl);
+      const url = this.buildCheckoutUrl(order, existing.id, ipAddress, returnUrl);
       return { paymentUrl: url, idempotent: true };
     }
 
@@ -147,18 +165,18 @@ export class PaymentsService {
       });
       if (!concurrent) throw error;
 
-      const url = this.buildVnpayUrl(order, concurrent.id, ipAddress, returnUrl);
+      const url = this.buildCheckoutUrl(order, concurrent.id, ipAddress, returnUrl);
       return { paymentUrl: url, idempotent: true };
     }
 
     const tmnCode = this.getConfig('VNPAY_TMN_CODE', 'vnpay.tmn-code');
     const hashSecret = this.getConfig('VNPAY_HASH_SECRET', 'vnpay.hash-secret');
     const paymentUrl = this.getConfig('VNPAY_PAYMENT_URL', 'vnpay.payment-url');
-    if (!tmnCode || !hashSecret || !paymentUrl) {
+    if (!isMockProvider() && (!tmnCode || !hashSecret || !paymentUrl)) {
       throw new ServiceUnavailableException('VNPay configuration is missing');
     }
 
-    const url = this.buildVnpayUrl(order, newPayment.id, ipAddress, returnUrl);
+    const url = this.buildCheckoutUrl(order, newPayment.id, ipAddress, returnUrl);
 
     return { paymentUrl: url, idempotent: false };
   }
@@ -218,6 +236,61 @@ export class PaymentsService {
     const paid =
       params.get('vnp_ResponseCode') === '00' &&
       params.get('vnp_TransactionStatus') === '00';
+    return this.applyPaymentResult(
+      order,
+      paymentId,
+      paid,
+      params.get('vnp_CardType') ?? '',
+      params.get('vnp_BankCode') ?? null,
+    );
+  }
+
+  /**
+   * Cổng thanh toán mô phỏng (ADR-008): khách xác nhận Ví/Thẻ trên trang /mock-pay.
+   * Quy tắc cố định để demo được nhánh lỗi: thẻ có 4 số cuối 0002 luôn bị từ chối.
+   * Gọi lại với payment đã có kết quả thì trả kết quả cũ, không xử lý lần hai.
+   */
+  async confirmMockPayment(
+    orderCode: string,
+    paymentId: number,
+    userId: number,
+    method: 'WALLET' | 'CARD',
+    cardNumber?: string,
+  ): Promise<PaymentReturnResult> {
+    const code = orderCode.startsWith('#') ? orderCode : `#${orderCode}`;
+    const order = (await this.prisma.orders.findUnique({
+      where: { order_code: code },
+    })) as OrderRecord | null;
+    if (!order || order.user_id !== userId) {
+      throw new NotFoundException('Order not found');
+    }
+    const payment = (await this.prisma.payments.findUnique({
+      where: { id: paymentId },
+    })) as PaymentRecord | null;
+    if (!payment || payment.order_id !== order.id) {
+      throw new NotFoundException('Payment not found');
+    }
+    if (payment.status !== 'PENDING') {
+      return { order, paid: payment.status === 'SUCCESS' };
+    }
+    const paid = mockGatewayApproves(method, cardNumber);
+    return this.applyPaymentResult(
+      order,
+      paymentId,
+      paid,
+      method === 'WALLET' ? 'MOCK_WALLET' : 'MOCK_CARD',
+      null,
+    );
+  }
+
+  private async applyPaymentResult(
+    order: OrderRecord,
+    paymentId: number,
+    paid: boolean,
+    paymentMethod: string,
+    bankCode: string | null,
+  ): Promise<PaymentReturnResult> {
+    const orderId = order.id;
     const target = paid ? 'PAID' : 'PAYMENT_FAILED';
     // Đơn đã huỷ mà VNPay báo huỷ/lỗi: giữ nguyên CANCELLED, không hồi sinh đơn.
     if (order.status === 'CANCELLED' && !paid) {
@@ -243,8 +316,8 @@ export class PaymentsService {
         where: { order_id: orderId, id: paymentId },
         data: {
           status: paid ? 'SUCCESS' : 'FAILED',
-          bank_code: params.get('vnp_BankCode') ?? null,
-          payment_method: params.get('vnp_CardType') ?? '',
+          bank_code: bankCode,
+          payment_method: paymentMethod,
         },
       })
       .catch(() => {
@@ -414,6 +487,25 @@ export class PaymentsService {
         data: { status: 'FAILED' },
       });
     }
+  }
+
+  /** URL trang thanh toán: trang /mock-pay của web (mặc định) hoặc VNPay sandbox. */
+  private buildCheckoutUrl(
+    order: OrderRecord,
+    paymentId: number,
+    ipAddress: string,
+    returnUrl: string,
+  ): string {
+    if (!isMockProvider()) {
+      return this.buildVnpayUrl(order, paymentId, ipAddress, returnUrl);
+    }
+    const web = (
+      process.env.FRONTEND_URL ||
+      process.env.CORS_ORIGIN ||
+      'http://localhost:3000'
+    ).replace(/\/+$/, '');
+    const code = order.order_code.replace(/^#/, '');
+    return `${web}/mock-pay?orderCode=${encodeURIComponent(code)}&paymentId=${paymentId}`;
   }
 
   /** Tạo URL thanh toán VNPay cho đơn hàng. Mỗi lần gọi sẽ có timestamp mới

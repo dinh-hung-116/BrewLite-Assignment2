@@ -115,6 +115,7 @@ describe('PaymentsService.processPaymentReturn', () => {
     vi.stubEnv('VNPAY_HASH_SECRET', HASH_SECRET);
     vi.stubEnv('VNPAY_TMN_CODE', TMN_CODE);
     vi.stubEnv('VNPAY_PAYMENT_URL', PAYMENT_URL);
+    vi.stubEnv('PAYMENT_PROVIDER', 'vnpay');
 
     findUniqueMock = vi.fn().mockResolvedValue(fakeOrder);
     updateMock = vi.fn().mockImplementation(async ({ data }: { data: { status: string } }) => ({
@@ -330,6 +331,7 @@ describe('PaymentsService.createPayment – Idempotency-Key (task b)', () => {
     vi.stubEnv('VNPAY_HASH_SECRET', HASH_SECRET);
     vi.stubEnv('VNPAY_TMN_CODE', TMN_CODE);
     vi.stubEnv('VNPAY_PAYMENT_URL', PAYMENT_URL);
+    vi.stubEnv('PAYMENT_PROVIDER', 'vnpay');
 
     ordersFindUniqueMock = vi.fn().mockResolvedValue(fakeOrder);
     paymentsCreateMock = vi.fn().mockResolvedValue({ id: 1 });
