@@ -8,7 +8,7 @@ Nền tảng theo [ADR-006](adr/006-deploy-tailscale-funnel-ghcr.md): máy serve
 
 | Node | Nền tảng | Cổng / giao thức | Artifact |
 |---|---|---|---|
-| Thiết bị người dùng | Trình duyệt di động / PWA | HTTPS 443 (web), 8443 (API) tới `<máy>.<tailnet>.ts.net` | – |
+| Thiết bị người dùng | Trình duyệt di động / PWA | HTTPS 8443 (web), 10000 (API) tới `datacenter.tailbd1760.ts.net` | – |
 | Tailscale Funnel | Relay của Tailscale, chứng chỉ `*.ts.net` | HTTPS công khai → đường hầm WireGuard tới `tailscaled` | – |
 | Web | Container trên máy server | `127.0.0.1:3000`, chỉ Funnel truy cập | Image `ghcr.io/dinh-hung-116/brewlite-web:<commit-sha>` từ `apps/web/Dockerfile` |
 | API | Container trên máy server | `127.0.0.1:3001`, chỉ Funnel truy cập | Image `ghcr.io/dinh-hung-116/brewlite-api:<commit-sha>` từ `apps/api/Dockerfile` |

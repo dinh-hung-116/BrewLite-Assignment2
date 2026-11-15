@@ -1,8 +1,9 @@
 # Production trên máy server của nhóm, công khai qua Tailscale Funnel (ADR-006).
 # CD (.github/workflows/cd.yml) chạy file này trên self-hosted runner với IMAGE_TAG = commit SHA.
 # Web và API chỉ mở trên 127.0.0.1; Tailscale Funnel đưa ra Internet bằng HTTPS:
-#   tailscale funnel --bg 3000                 -> https://<máy>.<tailnet>.ts.net
-#   tailscale funnel --bg --https=8443 3001    -> https://<máy>.<tailnet>.ts.net:8443
+#   tailscale funnel --bg --https=8443 3000    -> https://datacenter.tailbd1760.ts.net:8443   (web)
+#   tailscale funnel --bg --https=10000 3001   -> https://datacenter.tailbd1760.ts.net:10000  (API)
+# Cổng 443 của máy server đã dùng cho dịch vụ khác nên BrewLite dùng 8443 và 10000.
 # Database không mở cổng ra ngoài.
 
 name: brewlite-prod

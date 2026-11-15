@@ -14,6 +14,12 @@
 
 Sơ đồ viết bằng PlantUML; sinh lại ảnh: `plantuml -tsvg docs/diagrams/*.puml docs/architecture/*.puml`.
 
+## Production
+
+Web https://datacenter.tailbd1760.ts.net:8443 · API https://datacenter.tailbd1760.ts.net:10000 · Health https://datacenter.tailbd1760.ts.net:10000/health
+
+Tài khoản thử: `customer@brewlite.test` / `BrewLite123!` (khách), `staff@brewlite.test` / `BrewLite123!` (nhân viên quầy).
+
 ## Chạy nhanh
 
 ```bash
