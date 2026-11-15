@@ -1,0 +1,62 @@
+@startuml sequence-checkout
+' Sequence diagram cho UC-06 + UC-08 Đặt và thanh toán (Task 2.2)
+skinparam shadowing false
+autonumber
+actor Customer
+participant "Next.js UI" as UI
+participant "NestJS API" as API
+database "Database\n(PostgreSQL)" as DB
+participant "Payment Service\n(mô phỏng)" as PAY
+
+Customer -> UI : Bấm "Xác nhận thanh toán"\n(giỏ, mã KM, phương thức)
+UI -> API : POST /orders\nAuthorization: Bearer <JWT>\nbody: items[], promoCode
+API -> API : JwtAuthGuard kiểm tra JWT
+alt JWT thiếu hoặc hết hạn
+  API --> UI : 401 Unauthorized
+  UI --> Customer : Chuyển trang đăng nhập (giỏ giữ nguyên)
+end
+API -> API : ValidationPipe (class-validator)\nsố lượng 1–20, món tồn tại
+alt Dữ liệu không hợp lệ
+  API --> UI : 400 Bad Request
+  UI --> Customer : Hiện lỗi từng trường
+end
+API -> DB : SELECT giá sản phẩm, topping, khuyến mãi
+API -> API : Tự tính lại tổng tiền (BR-01), giảm giá
+group Transaction
+  API -> DB : UPDATE ingredients SET reserved = reserved + q,\nversion = version + 1\nWHERE id = ? AND version = ? AND quantity - reserved >= q
+  alt Thiếu nguyên liệu / đụng version quá số lần thử
+    API -> DB : ROLLBACK
+    API --> UI : 409 Conflict (nguyên liệu thiếu)
+    UI --> Customer : "Món tạm hết"
+  end
+  API -> DB : INSERT orders (PENDING, expires_at = now + 15')\nINSERT order_items
+  API -> DB : UPDATE promotions SET usage_count = usage_count + 1
+end
+API --> UI : 201 { orderCode, status: PENDING, total }
+
+UI -> UI : Sinh Idempotency-Key (UUID)
+UI -> API : POST /payments\nIdempotency-Key: k1\nbody: orderCode, method
+API -> DB : SELECT payments WHERE idempotency_key = k1
+alt Đã có payment với k1 (client gửi lại)
+  API --> UI : 200 kết quả lần trước (không gọi cổng lần 2)
+else Key mới
+  API -> DB : INSERT payments (k1, PENDING)\n-- UNIQUE(idempotency_key)
+  API -> PAY : charge(orderCode, amount, method)
+  alt Thanh toán thành công
+    PAY --> API : SUCCEEDED
+    group Transaction
+      API -> DB : UPDATE payments SET status = SUCCEEDED
+      API -> DB : UPDATE orders SET status = PAID\nWHERE id = ? AND status = PENDING
+      API -> DB : INSERT loyalty_transactions, UPDATE users.loyalty_points
+    end
+    API --> UI : 200 { status: PAID }
+    UI -> UI : Xóa giỏ hàng
+    UI --> Customer : Màn hình xác nhận (mã đơn, PAID)
+  else Thanh toán thất bại
+    PAY --> API : FAILED
+    API -> DB : UPDATE payments SET status = FAILED\nUPDATE orders SET status = PAYMENT_FAILED
+    API --> UI : 200 { status: PAYMENT_FAILED }
+    UI --> Customer : Báo lỗi, giữ giỏ, nút "Thanh toán lại"
+  end
+end
+@enduml

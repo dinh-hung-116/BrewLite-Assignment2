@@ -1,0 +1,131 @@
+@startuml class-domain
+' Class diagram mức domain (Task 2.3)
+skinparam shadowing false
+hide empty methods
+
+enum Role {
+  CUSTOMER
+  STAFF
+  ADMIN
+}
+enum OrderStatus {
+  PENDING
+  PAID
+  PAYMENT_FAILED
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
+}
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+enum PaymentMethod {
+  WALLET
+  CARD
+}
+enum Size {
+  S
+  M
+  L
+}
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+class User {
+  id: Int
+  email: String {unique}
+  passwordHash: String
+  name: String
+  role: Role
+  loyaltyPoints: Int
+}
+class Product {
+  id: Int
+  name: String
+  price: Decimal
+  imageUrl: String
+  category: String
+  isAvailable: Boolean
+}
+class Topping {
+  id: Int
+  name: String
+  price: Decimal
+}
+class Order {
+  id: Int
+  orderCode: String {unique}
+  status: OrderStatus
+  subtotal: Decimal
+  discountAmount: Decimal
+  total: Decimal
+  expiresAt: DateTime
+  createdAt: DateTime
+  +canTransition(to: OrderStatus): Boolean
+}
+class OrderItem {
+  id: Int
+  productName: String
+  size: Size
+  unitPrice: Decimal
+  quantity: Int [1..20]
+  lineTotal: Decimal
+}
+class Payment {
+  id: Int
+  idempotencyKey: String {unique}
+  method: PaymentMethod
+  amount: Decimal
+  status: PaymentStatus
+  createdAt: DateTime
+}
+class Promotion {
+  id: Int
+  code: String {unique}
+  discountType: DiscountType
+  discountValue: Decimal
+  minOrderValue: Decimal
+  maxDiscount: Decimal
+  usageLimit: Int
+  usageCount: Int
+  startDate: DateTime
+  endDate: DateTime
+  isActive: Boolean
+}
+class LoyaltyTransaction {
+  id: Int
+  points: Int
+  createdAt: DateTime
+}
+class Ingredient {
+  id: Int
+  name: String
+  unit: String
+  quantity: Decimal
+  reserved: Decimal
+  version: Int
+}
+
+User "1" -- "0..*" Order : đặt >
+Order "1" *-- "1..*" OrderItem : gồm >
+OrderItem "0..*" --> "0..1" Product : tham chiếu >
+OrderItem "0..*" -- "0..*" Topping : kèm >
+Order "1" -- "0..*" Payment : được thanh toán bởi >
+Order "0..*" --> "0..1" Promotion : áp dụng >
+User "1" -- "0..*" LoyaltyTransaction : nhận >
+LoyaltyTransaction "0..1" --> "1" Order : phát sinh từ >
+Product "0..*" -- "0..*" Ingredient : công thức >
+Topping "0..*" -- "0..*" Ingredient : tiêu hao >
+
+User ..> Role
+Order ..> OrderStatus
+Payment ..> PaymentStatus
+Payment ..> PaymentMethod
+OrderItem ..> Size
+Promotion ..> DiscountType
+@enduml

@@ -1,0 +1,78 @@
+@startuml activity-checkout
+' Activity diagram luồng end-to-end: menu -> thanh toán -> theo dõi (Task 2.1)
+skinparam shadowing false
+|Khách hàng|
+start
+:Mở BrewLite, xem menu;
+:Chọn món, size, topping, số lượng;
+|Hệ thống (Web + API)|
+:Kiểm tra món còn bán và đủ nguyên liệu;
+if (Còn hàng?) then (có)
+  |Khách hàng|
+  :Thêm vào giỏ hàng;
+else (hết hàng)
+  |Hệ thống (Web + API)|
+  :Hiện "Món tạm hết";
+  |Khách hàng|
+  :Chọn món khác;
+endif
+|Khách hàng|
+:Mở giỏ hàng, bấm "Thanh toán";
+|Hệ thống (Web + API)|
+if (Đã đăng nhập?) then (có)
+else (chưa)
+  :Chuyển trang đăng nhập;
+  |Khách hàng|
+  :Đăng nhập / đăng ký;
+  |Hệ thống (Web + API)|
+endif
+|Khách hàng|
+:Nhập mã khuyến mãi (tùy chọn),\nchọn Ví hoặc Thẻ, xác nhận;
+|Hệ thống (Web + API)|
+:Validate, tự tính lại giá, kiểm tra mã;
+if (Dữ liệu và mã hợp lệ?) then (có)
+else (không)
+  :Báo lỗi 400 kèm lý do;
+  |Khách hàng|
+  stop
+endif
+|Hệ thống (Web + API)|
+:Transaction: giữ nguyên liệu + tạo đơn PENDING;
+if (Đủ nguyên liệu?) then (có)
+else (thiếu)
+  :Rollback, báo 409 hết hàng;
+  |Khách hàng|
+  stop
+endif
+|Hệ thống (Web + API)|
+:Gửi yêu cầu thanh toán kèm Idempotency-Key;
+|Cổng thanh toán mô phỏng|
+:Xử lý trừ tiền;
+if (Thành công?) then (có)
+  |Hệ thống (Web + API)|
+  :Payment SUCCEEDED, đơn PAID,\ncộng điểm, xóa giỏ;
+else (thất bại)
+  |Hệ thống (Web + API)|
+  :Payment FAILED, đơn PAYMENT_FAILED,\ngiữ giỏ hàng;
+  |Khách hàng|
+  if (Thanh toán lại trong 15 phút?) then (có)
+    :Bấm "Thanh toán lại";
+    note right: quay lại bước gửi yêu cầu\nthanh toán với key mới
+    stop
+  else (không)
+    |Hệ thống (Web + API)|
+    :Hết hạn => đơn CANCELLED,\ntrả nguyên liệu;
+    stop
+  endif
+endif
+|Hệ thống (Web + API)|
+:Hiển thị xác nhận (mã đơn, PAID);
+|Nhân viên quầy|
+:Nhận đơn => PREPARING;
+:Pha xong => READY;
+|Khách hàng|
+:Thấy "Sẵn sàng", tới quầy lấy nước;
+|Nhân viên quầy|
+:Giao khách => COMPLETED;
+stop
+@enduml
