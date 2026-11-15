@@ -1,9 +1,10 @@
 @startuml class-domain
-' Class diagram mức domain (Task 2.3)
+' Class diagram mức domain (Task 2.3) – bám đúng apps/api/prisma/schema.prisma
+' Tên thuộc tính viết camelCase, ánh xạ 1-1 với cột snake_case trong CSDL.
 skinparam shadowing false
 hide empty methods
 
-enum Role {
+enum UserRole {
   CUSTOMER
   STAFF
   ADMIN
@@ -12,28 +13,15 @@ enum OrderStatus {
   PENDING
   PAID
   PAYMENT_FAILED
+  CANCELLED
   PREPARING
   READY
   COMPLETED
-  CANCELLED
 }
 enum PaymentStatus {
   PENDING
-  SUCCEEDED
+  SUCCESS
   FAILED
-}
-enum PaymentMethod {
-  WALLET
-  CARD
-}
-enum Size {
-  S
-  M
-  L
-}
-enum DiscountType {
-  PERCENTAGE
-  FIXED
 }
 
 class User {
@@ -41,57 +29,65 @@ class User {
   email: String {unique}
   passwordHash: String
   name: String
-  role: Role
+  phone: String [0..1]
+  role: UserRole
   loyaltyPoints: Int
 }
 class Product {
   id: Int
   name: String
+  description: String [0..1]
   price: Decimal
-  imageUrl: String
-  category: String
+  imageUrl: String [0..1]
+  category: String [0..1]
   isAvailable: Boolean
 }
 class Topping {
   id: Int
-  name: String
+  name: String {unique}
   price: Decimal
+  isAvailable: Boolean
 }
 class Order {
   id: Int
   orderCode: String {unique}
   status: OrderStatus
-  subtotal: Decimal
+  totalPrice: Decimal
   discountAmount: Decimal
-  total: Decimal
-  expiresAt: DateTime
   createdAt: DateTime
-  +canTransition(to: OrderStatus): Boolean
+  updatedAt: DateTime
 }
 class OrderItem {
   id: Int
   productName: String
-  size: Size
-  unitPrice: Decimal
+  size: String {S, M, L}
+  price: Decimal
   quantity: Int [1..20]
-  lineTotal: Decimal
+  subtotal: Decimal
+}
+class OrderItemTopping {
+  id: Int
+  toppingName: String
+  price: Decimal
 }
 class Payment {
   id: Int
   idempotencyKey: String {unique}
-  method: PaymentMethod
+  paymentMethod: String {WALLET, CARD, VNPAY}
   amount: Decimal
   status: PaymentStatus
+  bankCode: String [0..1]
   createdAt: DateTime
 }
 class Promotion {
   id: Int
-  code: String {unique}
-  discountType: DiscountType
+  name: String
+  promoCode: String [0..1] {unique}
+  discountType: String {PERCENTAGE, FIXED_AMOUNT}
   discountValue: Decimal
-  minOrderValue: Decimal
-  maxDiscount: Decimal
-  usageLimit: Int
+  minOrderValue: Decimal [0..1]
+  maxDiscount: Decimal [0..1]
+  usageLimit: Int [0..1]
   usageCount: Int
   startDate: DateTime
   endDate: DateTime
@@ -102,30 +98,53 @@ class LoyaltyTransaction {
   points: Int
   createdAt: DateTime
 }
+class Recipe {
+  id: Int
+  sizeFactorS: Decimal
+  sizeFactorM: Decimal
+  sizeFactorL: Decimal
+}
+class RecipeIngredient {
+  id: Int
+  quantity: Decimal
+}
+class ToppingIngredient {
+  id: Int
+  quantity: Decimal
+}
 class Ingredient {
   id: Int
-  name: String
+  name: String {unique}
   unit: String
   quantity: Decimal
   reserved: Decimal
   version: Int
 }
+class OrderIngredientReservation {
+  id: Int
+  quantity: Decimal
+  consumedAt: DateTime [0..1]
+  releasedAt: DateTime [0..1]
+}
 
-User "1" -- "0..*" Order : đặt >
+User "0..1" -- "0..*" Order : đặt >
 Order "1" *-- "1..*" OrderItem : gồm >
+OrderItem "1" *-- "0..*" OrderItemTopping : kèm >
 OrderItem "0..*" --> "0..1" Product : tham chiếu >
-OrderItem "0..*" -- "0..*" Topping : kèm >
-Order "1" -- "0..*" Payment : được thanh toán bởi >
+OrderItemTopping "0..*" --> "0..1" Topping : tham chiếu >
+Order "1" *-- "0..*" Payment : được thanh toán bởi >
 Order "0..*" --> "0..1" Promotion : áp dụng >
-User "1" -- "0..*" LoyaltyTransaction : nhận >
-LoyaltyTransaction "0..1" --> "1" Order : phát sinh từ >
-Product "0..*" -- "0..*" Ingredient : công thức >
-Topping "0..*" -- "0..*" Ingredient : tiêu hao >
+User "1" *-- "0..*" LoyaltyTransaction : nhận >
+LoyaltyTransaction "0..1" --> "0..1" Order : phát sinh từ >
+Product "1" *-- "0..1" Recipe : công thức >
+Recipe "1" *-- "0..*" RecipeIngredient
+RecipeIngredient "0..*" --> "1" Ingredient
+Topping "1" *-- "0..*" ToppingIngredient
+ToppingIngredient "0..*" --> "1" Ingredient
+Order "1" *-- "0..*" OrderIngredientReservation : giữ chỗ >
+OrderIngredientReservation "0..*" --> "1" Ingredient
 
-User ..> Role
+User ..> UserRole
 Order ..> OrderStatus
 Payment ..> PaymentStatus
-Payment ..> PaymentMethod
-OrderItem ..> Size
-Promotion ..> DiscountType
 @enduml

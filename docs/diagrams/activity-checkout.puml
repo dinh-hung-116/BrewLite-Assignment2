@@ -1,35 +1,22 @@
 @startuml activity-checkout
-' Activity diagram luồng end-to-end: menu -> thanh toán -> theo dõi (Task 2.1)
+' Activity diagram luồng end-to-end: menu -> đặt đơn -> thanh toán -> pha chế (Task 2.1)
+' Bám code: tạo đơn trước, chọn Ví/Thẻ ở trang /mock-pay sau; tồn kho chỉ kiểm tra khi đặt đơn.
 skinparam shadowing false
 |Khách hàng|
 start
 :Mở BrewLite, xem menu;
 :Chọn món, size, topping, số lượng;
-|Hệ thống (Web + API)|
-:Kiểm tra món còn bán và đủ nguyên liệu;
-if (Còn hàng?) then (có)
-  |Khách hàng|
-  :Thêm vào giỏ hàng;
-else (hết hàng)
-  |Hệ thống (Web + API)|
-  :Hiện "Món tạm hết";
-  |Khách hàng|
-  :Chọn món khác;
-endif
-|Khách hàng|
-:Mở giỏ hàng, bấm "Thanh toán";
+:Thêm vào giỏ hàng\n(giỏ lưu trên trình duyệt);
+:Mở giỏ hàng, nhập mã khuyến mãi (tùy chọn),\nbấm "Đặt hàng";
 |Hệ thống (Web + API)|
 if (Đã đăng nhập?) then (có)
 else (chưa)
-  :Chuyển trang đăng nhập;
+  :Chuyển trang đăng nhập (giỏ giữ nguyên);
   |Khách hàng|
   :Đăng nhập / đăng ký;
   |Hệ thống (Web + API)|
 endif
-|Khách hàng|
-:Nhập mã khuyến mãi (tùy chọn),\nchọn Ví hoặc Thẻ, xác nhận;
-|Hệ thống (Web + API)|
-:Validate, tự tính lại giá, kiểm tra mã;
+:POST /orders: validate, tự tính lại giá,\nkiểm tra mã khuyến mãi;
 if (Dữ liệu và mã hợp lệ?) then (có)
 else (không)
   :Báo lỗi 400 kèm lý do;
@@ -37,42 +24,55 @@ else (không)
   stop
 endif
 |Hệ thống (Web + API)|
-:Transaction: giữ nguyên liệu + tạo đơn PENDING;
+:Transaction: tạo đơn PENDING + giữ chỗ nguyên liệu;
 if (Đủ nguyên liệu?) then (có)
 else (thiếu)
-  :Rollback, báo 409 hết hàng;
+  :Rollback, báo 409 "Món tạm hết";
   |Khách hàng|
   stop
 endif
-|Hệ thống (Web + API)|
-:Gửi yêu cầu thanh toán kèm Idempotency-Key;
-|Cổng thanh toán mô phỏng|
-:Xử lý trừ tiền;
-if (Thành công?) then (có)
+|Khách hàng|
+:Chọn Ví điện tử hoặc Thẻ\n(trang thanh toán, hoặc sang VNPay sandbox);
+repeat
   |Hệ thống (Web + API)|
-  :Payment SUCCEEDED, đơn PAID,\ncộng điểm, xóa giỏ;
-else (thất bại)
+  :Gửi yêu cầu thanh toán kèm Idempotency-Key\n(key mới cho mỗi lần thanh toán);
+  |Cổng thanh toán\n(VNPay sandbox / mô phỏng)|
+  :Xử lý trừ tiền, trả kết quả;
   |Hệ thống (Web + API)|
-  :Payment FAILED, đơn PAYMENT_FAILED,\ngiữ giỏ hàng;
-  |Khách hàng|
-  if (Thanh toán lại trong 15 phút?) then (có)
-    :Bấm "Thanh toán lại";
-    note right: quay lại bước gửi yêu cầu\nthanh toán với key mới
-    stop
-  else (không)
-    |Hệ thống (Web + API)|
-    :Hết hạn => đơn CANCELLED,\ntrả nguyên liệu;
-    stop
+  if (Thành công?) then (có)
+    :Transaction: payment SUCCESS, đơn PAID,\ntăng lượt dùng mã khuyến mãi;
+    :Cộng điểm thưởng, xóa giỏ hàng;
+  else (thất bại)
+    :Payment FAILED, đơn PAYMENT_FAILED,\ngiữ giỏ hàng và nguyên liệu đã giữ;
   endif
+repeat while (Thất bại và khách bấm "Thanh toán lại"?) is (có)
+->không;
+if (Đơn đã PAID?) then (có)
+else (chưa)
+  if (Khách tự hủy đơn?) then (có)
+    :Đơn CANCELLED, hoàn trả nguyên liệu;
+  else (bỏ dở)
+    :Bộ hẹn giờ: đơn chờ quá 15 phút\nchuyển CANCELLED, hoàn trả nguyên liệu;
+  endif
+  stop
 endif
 |Hệ thống (Web + API)|
 :Hiển thị xác nhận (mã đơn, PAID);
 |Nhân viên quầy|
-:Nhận đơn => PREPARING;
-:Pha xong => READY;
+:Xem hàng đợi đơn đã thanh toán;
+if (Đơn gặp sự cố?) then (có)
+  :Hủy đơn tại quầy;
+  |Hệ thống (Web + API)|
+  :Đơn CANCELLED, hoàn trả nguyên liệu;
+  stop
+else (không)
+  |Nhân viên quầy|
+  :Nhận đơn → PREPARING;
+  :Pha xong → READY;
+endif
 |Khách hàng|
-:Thấy "Sẵn sàng", tới quầy lấy nước;
+:Trang chi tiết đơn tự làm mới,\nthấy "Sẵn sàng", tới quầy lấy nước;
 |Nhân viên quầy|
-:Giao khách => COMPLETED;
+:Giao khách → COMPLETED;
 stop
 @enduml
