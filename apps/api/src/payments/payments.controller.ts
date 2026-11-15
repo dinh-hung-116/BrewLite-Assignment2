@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Headers,
@@ -11,6 +12,7 @@ import {
 import type { Request, Response } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import type { AuthenticatedUser } from '../auth/jwt.strategy.js';
+import { MockConfirmDto } from './dto/mock-confirm.dto.js';
 import { PaymentsService } from './payments.service.js';
 
 @Controller('/api/payment')
@@ -40,6 +42,23 @@ export class PaymentsController {
     );
 
     return { paymentUrl };
+  }
+
+  /** Cổng mô phỏng: trang /mock-pay gửi lựa chọn Ví/Thẻ của khách về đây. */
+  @UseGuards(JwtAuthGuard)
+  @Post('/mock/confirm')
+  async confirmMock(
+    @Body() dto: MockConfirmDto,
+    @Req() req: Request & { user: AuthenticatedUser },
+  ) {
+    const { order, paid } = await this.paymentsService.confirmMockPayment(
+      dto.orderCode,
+      dto.paymentId,
+      Number(req.user.userId),
+      dto.method,
+      dto.cardNumber,
+    );
+    return { orderCode: order.order_code, paid };
   }
 
   @Get('/return')

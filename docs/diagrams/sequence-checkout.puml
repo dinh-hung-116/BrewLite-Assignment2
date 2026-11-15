@@ -35,27 +35,36 @@ end
 API --> UI : 201 { orderCode, status: PENDING, total }
 
 UI -> UI : Sinh Idempotency-Key (UUID)
-UI -> API : POST /payments\nIdempotency-Key: k1\nbody: orderCode, method
+UI -> API : POST /api/payment/create/{code}\nIdempotency-Key: k1
 API -> DB : SELECT payments WHERE idempotency_key = k1
 alt Đã có payment với k1 (client gửi lại)
-  API --> UI : 200 kết quả lần trước (không gọi cổng lần 2)
+  API --> UI : 201 { paymentUrl } của payment cũ (không tạo payment mới)
 else Key mới
   API -> DB : INSERT payments (k1, PENDING)\n-- UNIQUE(idempotency_key)
-  API -> PAY : charge(orderCode, amount, method)
+  API --> UI : 201 { paymentUrl: /mock-pay?orderCode&paymentId }
+end
+Customer -> UI : Chọn Ví điện tử hoặc nhập số thẻ
+UI -> API : POST /api/payment/mock/confirm\nbody: orderCode, paymentId, method, cardNumber
+API -> DB : SELECT payments WHERE id = paymentId
+alt Payment đã có kết quả (gửi lại)
+  API --> UI : 201 kết quả lần trước (không xử lý lần 2)
+else Payment PENDING
+  API -> PAY : charge(method, cardNumber)
   alt Thanh toán thành công
     PAY --> API : SUCCEEDED
     group Transaction
-      API -> DB : UPDATE payments SET status = SUCCEEDED
-      API -> DB : UPDATE orders SET status = PAID\nWHERE id = ? AND status = PENDING
-      API -> DB : INSERT loyalty_transactions, UPDATE users.loyalty_points
+      API -> DB : UPDATE orders SET status = PAID\nWHERE id = ? AND status IN (PENDING, PAYMENT_FAILED)
+      API -> DB : UPDATE payments SET status = SUCCESS WHERE status = PENDING
+      API -> DB : UPDATE promotions.usage_count (nếu có mã)
     end
-    API --> UI : 200 { status: PAID }
+    API -> DB : INSERT loyalty_transactions, UPDATE users.loyalty_points
+    API --> UI : 201 { paid: true }
     UI -> UI : Xóa giỏ hàng
     UI --> Customer : Màn hình xác nhận (mã đơn, PAID)
-  else Thanh toán thất bại
+  else Thanh toán thất bại (thẻ đuôi 0002)
     PAY --> API : FAILED
-    API -> DB : UPDATE payments SET status = FAILED\nUPDATE orders SET status = PAYMENT_FAILED
-    API --> UI : 200 { status: PAYMENT_FAILED }
+    API -> DB : UPDATE orders SET status = PAYMENT_FAILED\nUPDATE payments SET status = FAILED
+    API --> UI : 201 { paid: false }
     UI --> Customer : Báo lỗi, giữ giỏ, nút "Thanh toán lại"
   end
 end

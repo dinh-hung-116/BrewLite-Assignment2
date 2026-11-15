@@ -1,47 +1,51 @@
-# BrewLite: database + backend + frontend
-# Chạy: docker compose up -d --build
-# Seed dữ liệu mẫu: docker compose run --rm backend npm run db:seed
+# BrewLite: PostgreSQL + API (NestJS) + Web (Next.js)
+# Chạy:            docker compose up -d --build
+# Dữ liệu mẫu:     docker compose run --rm api npx prisma db seed
+# Web http://localhost:3000, API http://localhost:3001 (/health), DB localhost:5434
 
-name: brewlite-stack
+name: brewlite
 
 services:
   db:
-    image: postgres:18-alpine
+    image: postgres:16-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-brewlite}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-brewlite}
       POSTGRES_DB: ${POSTGRES_DB:-brewlite_db}
-    # 5434 ở host để không đụng PostgreSQL Windows (5432) và container brewlite-db cũ (5433)
     ports:
       - "5434:5432"
     volumes:
-      - db_data:/var/lib/postgresql
+      - db_data:/var/lib/postgresql/data
     healthcheck:
-      test:
-        ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-brewlite} -d ${POSTGRES_DB:-brewlite_db}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-brewlite} -d ${POSTGRES_DB:-brewlite_db}"]
       interval: 5s
       timeout: 5s
       retries: 20
 
-  backend:
-    image: ${BACKEND_IMAGE}:${IMAGE_TAG}
+  api:
+    image: ${API_IMAGE:-brewlite-api}:${IMAGE_TAG:-local}
     build:
       context: ./apps/api
+      args:
+        GIT_SHA: ${IMAGE_TAG:-local}
     env_file:
-      - ./apps/api/.env
+      - path: ./apps/api/.env
+        required: false
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-brewlite}:${POSTGRES_PASSWORD:-brewlite}@db:5432/${POSTGRES_DB:-brewlite_db}
       PORT: 3001
       CORS_ORIGIN: http://localhost:3000
-      JWT_SECRET: ${JWT_SECRET:-brewlite_super_secret_jwt_key_2026}
+      FRONTEND_URL: http://localhost:3000
+      JWT_SECRET: ${JWT_SECRET:-local-dev-secret}
+      PAYMENT_PROVIDER: mock
     ports:
       - "3001:3001"
     depends_on:
       db:
         condition: service_healthy
 
-  frontend:
-    image: ${FRONTEND_IMAGE}:${IMAGE_TAG}
+  web:
+    image: ${WEB_IMAGE:-brewlite-web}:${IMAGE_TAG:-local}
     build:
       context: ./apps/web
       args:
@@ -49,9 +53,8 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - backend
+      api:
+        condition: service_healthy
 
 volumes:
   db_data:
-    # Volume riêng của stack này, tách hẳn volume brewlite_brewlite_postgres_data của container cũ
-    name: brewlite_stack_db_data

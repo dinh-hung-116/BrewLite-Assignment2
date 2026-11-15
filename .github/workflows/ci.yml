@@ -78,3 +78,34 @@ jobs:
         run: npx prisma migrate deploy && npx prisma db seed
       - name: Integration test
         run: npm run test:e2e
+
+  e2e:
+    name: web - E2E Playwright (Pixel 7)
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start stack (db + api + web)
+        run: docker compose up -d --build --wait
+      - name: Seed sample data
+        run: docker compose run --rm api npx prisma db seed
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - name: Install Playwright
+        working-directory: apps/web
+        run: npm ci && npx playwright install --with-deps chromium
+      - name: E2E
+        working-directory: apps/web
+        run: npx playwright test
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs

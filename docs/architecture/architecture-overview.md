@@ -17,7 +17,7 @@ Khách hàng và nhân viên quầy dùng BrewLite qua trình duyệt (HTTPS). B
 | Web App | Next.js (App Router), React, TypeScript, Tailwind; PWA manifest | `apps/web` | Giao diện mobile-first: menu, chi tiết, giỏ (lưu localStorage), đăng nhập, thanh toán, theo dõi đơn (poll 5 giây), màn hình quầy `/staff` |
 | API | NestJS, TypeScript, class-validator, Passport JWT, bcrypt | `apps/api` | REST JSON, xác thực, nghiệp vụ đơn, state machine, thanh toán idempotent, tồn kho, khuyến mãi, điểm thưởng, `/health` |
 | Database | PostgreSQL 16 + Prisma migration/seed | `apps/api/prisma` | Lưu user, sản phẩm, đơn, payment, khuyến mãi, nguyên liệu |
-| Mock Payment Service | Class `MockPaymentGateway` trong API sau interface `PaymentGateway` | `apps/api/src/payments` | Mô phỏng trừ tiền Ví/Thẻ, trả SUCCEEDED/FAILED (ADR-008) |
+| Mock Payment Service | Hàm `mockGatewayApproves` + trang `/mock-pay`, chọn bằng `PAYMENT_PROVIDER=mock` | `apps/api/src/payments` | Mô phỏng trừ tiền Ví/Thẻ, trả SUCCEEDED/FAILED (ADR-008) |
 
 ## 3. Phân lớp trong backend (ADR-002)
 
@@ -37,8 +37,8 @@ Exception filter chung → JSON { statusCode, message } ; log mỗi request
 | `auth` | `POST /auth/register`, `POST /auth/login`, `GET /auth/me` | FR-04 |
 | `orders` | `POST /orders`, `GET /orders/me`, `GET /orders/:code`, `POST /orders/:code/cancel` | FR-05, FR-08, FR-09, FR-14 |
 | `staff` (trong orders) | `GET /staff/orders`, `PATCH /orders/:code/status` | FR-10 |
-| `payments` | `POST /payments` (header `Idempotency-Key`) | FR-06, FR-07, FR-12 |
-| `promotions` | `POST /promotions/validate` | FR-11 |
+| `payments` | `POST /api/payment/create/:code` (header `Idempotency-Key`), `POST /api/payment/mock/confirm` | FR-06, FR-07, FR-12 |
+| `promotions` (trong orders) | `POST /orders/validate-promotion` | FR-11 |
 | `inventory` | dùng nội bộ khi tạo/hủy/hoàn tất đơn | FR-13 |
 | `health` | `GET /health` | NFR-04 |
 

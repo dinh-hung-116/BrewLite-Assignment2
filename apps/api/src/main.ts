@@ -6,6 +6,14 @@ import {DocumentBuilder, SwaggerModule} from "@nestjs/swagger";
 
 loadEnvFiles();
 
+// NFR-02: production thiếu cấu hình bắt buộc thì dừng ngay, không chạy với secret mặc định.
+if (process.env.NODE_ENV === 'production') {
+  const missing = ['DATABASE_URL', 'JWT_SECRET'].filter((k) => !process.env[k]);
+  if (missing.length) {
+    throw new Error(`Thiếu biến môi trường: ${missing.join(', ')}`);
+  }
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // Cho phép frontend Next.js (cổng 3000) gọi API
