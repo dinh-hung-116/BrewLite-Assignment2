@@ -14,7 +14,7 @@ Yêu cầu (SRS) → Use case → Thiết kế → Mã nguồn → Kiểm thử.
 | FR-08 Xác nhận, theo dõi | UC-09 | Activity-01 | `web/app/order-confirmation`, `web/app/orders/[id]` | E2E AC-01, AC-02 |
 | FR-09 Lịch sử đơn | UC-10 | Class-01 | `orders.controller.ts` (`GET /orders/me`) | `orders.controller.spec.ts` |
 | FR-10 Trạng thái đơn (quầy) | UC-12 | ADR-003, BR-06 | `orders/order-state.ts`, `staff-orders.controller.ts`, `web/app/staff` | `order-state.spec.ts`, `staff-orders.spec.ts` |
-| FR-11 Khuyến mãi | UC-07 | Class-01 Promotion | `orders.service.ts` (`validatePromotion`) | `payments.service.spec.ts` (usage_count khi thanh toán) |
+| FR-11 Khuyến mãi | UC-07 | Class-01 Promotion | `orders.service.ts` (`validatePromotion`) | `promotion.spec.ts` (AC-07), `payments.service.spec.ts` (usage_count khi thanh toán) |
 | FR-12 Điểm thưởng | UC-08 | BR-03, Class-01 LoyaltyTransaction | `payments.service.ts` (`awardLoyaltyPoints`) | `payments.service.spec.ts` |
 | FR-13 Tồn kho | UC-06 E3 | ADR-005, BR-04 | `api/src/inventory/*` | `inventory.calculator.spec.ts`, `inventory.service.spec.ts` |
 | FR-14 Hủy đơn, hết hạn 15 phút | UC-11 | BR-05 | `orders.service.ts` (`cancelOrder`), `order-expiry.service.ts`, `payments-scheduler.service.ts` | `orders.cancel.spec.ts`, `payments-scheduler.service.spec.ts` |

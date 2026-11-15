@@ -32,6 +32,16 @@ Nếu `deploy` hoặc `smoke-test` lỗi, job `rollback` đưa API về image `s
 
 ## 3. Secret và log
 
-- Repo chỉ có `apps/api/.env.example` không chứa giá trị thật; `.env` nằm trong `.gitignore`.
+- Repo chỉ có `.env.example` và `apps/api/.env.example` không chứa giá trị thật; `.env` nằm trong `.gitignore`.
 - API dừng ngay nếu production thiếu `DATABASE_URL` hoặc `JWT_SECRET`.
 - GitHub Actions tự che giá trị secret trong log. Log API xem ở Render → Logs, log web ở Vercel → Logs.
+
+## 4. Rollback thủ công
+
+Dùng khi cần quay lại bản trước mà không chờ pipeline:
+
+1. **API (Render):** Render → service `brewlite-api` → Events → chọn lần deploy trước đó → *Rollback*. Hoặc gọi deploy hook với image ổn định: `curl -X POST "$RENDER_DEPLOY_HOOK_URL&imgURL=ghcr.io/<owner>/brewlite-api:stable"`.
+2. **Web (Vercel):** Vercel → Deployments → chọn bản trước → *Promote to Production*, hoặc `vercel rollback --token $VERCEL_TOKEN`.
+3. **Mã nguồn:** `git revert <commit>` trên nhánh mới, mở PR vào `main`; CD deploy lại bản đã revert.
+4. **Database:** migration Prisma chỉ thêm (không xóa cột) nên API bản cũ vẫn chạy được trên schema mới; không chạy `migrate reset` trên production.
+5. Kiểm tra lại `GET /health` (đúng SHA của bản cũ) và mở trang web.
