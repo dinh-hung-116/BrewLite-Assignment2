@@ -1,0 +1,15 @@
+@startuml deployment-local
+' Môi trường local (docker compose) và ranh giới với CI
+skinparam shadowing false
+node "Máy lập trình viên – docker compose" as L {
+  node "web (Next.js) :3000" as W
+  node "api (NestJS) :3001" as A
+  database "db (PostgreSQL) :5432\nvolume brewlite-data" as D
+}
+node "GitHub Actions (CI)" as CI {
+  artifact "Install → Lint → Unit Test → Build\n+ Integration (service postgres)\n+ E2E (docker compose)" as Q
+}
+W --> A : http://localhost:3001
+A --> D : postgresql://db:5432
+L ..> CI : git push / pull request
+@enduml
