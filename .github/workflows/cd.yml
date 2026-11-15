@@ -1,0 +1,120 @@
+# CD: merge vào main (hoặc tag v*) -> build image API gắn tag commit SHA -> đẩy lên GHCR
+# -> deploy API lên Render, web lên Vercel -> smoke test production -> lỗi thì rollback.
+# Bật deploy bằng repository variable DEPLOY_ENABLED=true sau khi đã khai báo secret (docs/deployment.md).
+name: CD
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+concurrency:
+  group: cd-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  API_IMAGE: ghcr.io/${{ github.repository_owner }}/brewlite-api
+
+jobs:
+  build-push:
+    name: Build + push image API (tag SHA)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Image name lowercase
+        run: echo "API_IMAGE=${API_IMAGE,,}" >> "$GITHUB_ENV"
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build + push
+        run: |
+          docker build --build-arg GIT_SHA=${{ github.sha }} -t "$API_IMAGE:${{ github.sha }}" apps/api
+          docker push "$API_IMAGE:${{ github.sha }}"
+
+  deploy:
+    name: Deploy production
+    needs: build-push
+    if: vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.WEB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Image name lowercase
+        run: echo "API_IMAGE=${API_IMAGE,,}" >> "$GITHUB_ENV"
+      - name: Deploy API lên Render (image theo SHA)
+        run: |
+          curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}&imgURL=$(printf %s "$API_IMAGE:${{ github.sha }}" | jq -sRr @uri)"
+      - name: Đợi API trả đúng phiên bản
+        run: |
+          for i in $(seq 1 60); do
+            v=$(curl -fsS "${{ vars.API_URL }}/health" | jq -r .version || true)
+            [ "$v" = "${{ github.sha }}" ] && echo "API $v" && exit 0
+            sleep 10
+          done
+          echo "API chưa lên phiên bản ${{ github.sha }}"; exit 1
+      - name: Deploy web lên Vercel
+        working-directory: apps/web
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          npx vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
+          npx vercel@latest build --prod --token="$VERCEL_TOKEN"
+          npx vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+
+  smoke-test:
+    name: Smoke test production
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: /health đúng SHA, DB up
+        run: |
+          body=$(curl -fsS "${{ vars.API_URL }}/health")
+          echo "$body"
+          echo "$body" | jq -e --arg sha "${{ github.sha }}" '.status=="ok" and .db=="up" and .version==$sha'
+      - name: /products có dữ liệu
+        run: curl -fsS "${{ vars.API_URL }}/products" | jq -e 'length > 0'
+      - name: Trang web mở được qua HTTPS
+        run: curl -fsS -o /dev/null "${{ vars.WEB_URL }}/"
+
+  mark-stable:
+    name: Gắn tag stable cho image đã qua smoke test
+    needs: smoke-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Image name lowercase
+        run: echo "API_IMAGE=${API_IMAGE,,}" >> "$GITHUB_ENV"
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: docker buildx imagetools create -t "$API_IMAGE:stable" "$API_IMAGE:${{ github.sha }}"
+
+  rollback:
+    name: Rollback về bản stable
+    needs: [deploy, smoke-test]
+    if: failure() && vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Image name lowercase
+        run: echo "API_IMAGE=${API_IMAGE,,}" >> "$GITHUB_ENV"
+      - name: API về image stable
+        run: |
+          curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}&imgURL=$(printf %s "$API_IMAGE:stable" | jq -sRr @uri)"
+      - name: Web về bản production trước
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: npx vercel@latest rollback --yes --token="$VERCEL_TOKEN"
