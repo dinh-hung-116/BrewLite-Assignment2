@@ -32,13 +32,13 @@ Repository chỉ có `.env.example`; secret không in ra log (GitHub tự che gi
 
 ## 3. Health check và log
 
-- Docker `HEALTHCHECK` gọi `GET /health` (trả commit SHA và trạng thái DB); `docker compose up --wait` chỉ xong khi API healthy.
+- Docker `HEALTHCHECK` gọi `GET /health`; API trả `{status, db, version}` (HTTP 200 khi DB up, 503 khi DB lỗi), `version` là commit SHA. `docker compose up --wait` chỉ xong khi API healthy.
 - Sau deploy, job `smoke-test` chạy trên runner của GitHub, gọi `/health` (đúng SHA vừa deploy), `/products` và trang `/` qua URL Funnel công khai; lỗi thì job `rollback` chạy lại image `stable`.
 - Log: `docker compose -f docker-compose.prod.yml logs api web` trên máy server; log pipeline trên GitHub Actions.
 
 ## 4. Ranh giới Local, CI và Production
 
-![Local và CI](deployment-local.svg) – nguồn [deployment-local.puml](deployment-local.puml)
+![Ranh giới Local, CI và Production](deployment-local.svg) – nguồn [deployment-local.puml](deployment-local.puml)
 
 | Môi trường | Chạy ở đâu | DB | Secret |
 |---|---|---|---|
